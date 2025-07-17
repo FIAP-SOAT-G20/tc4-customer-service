@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:17-alpine3.21
+    container_name: db.10soat-g22.dev
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fastfood_10soat_g22_tc3
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - fastfood_10soat_g22_tc3_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  dbadmin:
+    image: dpage/pgadmin4
+    container_name: dbadmin.10soat-g22.dev
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - fastfood_10soat_g22_tc3_network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  fastfood_10soat_g22_tc3_network:
+    driver: bridge
