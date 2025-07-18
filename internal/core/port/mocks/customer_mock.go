@@ -88,6 +88,21 @@ func (mr *MockCustomerControllerMockRecorder) Get(ctx, presenter, input any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCustomerController)(nil).Get), ctx, presenter, input)
 }
 
+// GetByCPF mocks base method.
+func (m *MockCustomerController) GetByCPF(ctx context.Context, presenter port.Presenter, input dto.GetCustomerByCPFInput) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByCPF", ctx, presenter, input)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByCPF indicates an expected call of GetByCPF.
+func (mr *MockCustomerControllerMockRecorder) GetByCPF(ctx, presenter, input any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByCPF", reflect.TypeOf((*MockCustomerController)(nil).GetByCPF), ctx, presenter, input)
+}
+
 // List mocks base method.
 func (m *MockCustomerController) List(ctx context.Context, presenter port.Presenter, input dto.ListCustomersInput) ([]byte, error) {
 	m.ctrl.T.Helper()

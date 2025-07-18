@@ -11,6 +11,7 @@ type CustomerController interface {
 	List(ctx context.Context, presenter Presenter, input dto.ListCustomersInput) ([]byte, error)
 	Create(ctx context.Context, presenter Presenter, input dto.CreateCustomerInput) ([]byte, error)
 	Get(ctx context.Context, presenter Presenter, input dto.GetCustomerInput) ([]byte, error)
+	GetByCPF(ctx context.Context, presenter Presenter, input dto.GetCustomerByCPFInput) ([]byte, error)
 	Update(ctx context.Context, presenter Presenter, input dto.UpdateCustomerInput) ([]byte, error)
 	Delete(ctx context.Context, presenter Presenter, input dto.DeleteCustomerInput) ([]byte, error)
 }
