@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"testing"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
 	mockport "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port/mocks"
 )
@@ -86,7 +86,7 @@ func TestHandleRequest_ControllerError(t *testing.T) {
 	mockController.
 		EXPECT().
 		Get(gomock.Any(), gomock.Any(), reqInput).
-		Return(nil, errors.New("not found")).
+		Return(nil, &domain.NotFoundError{Message: "not found"}).
 		Times(1)
 
 	resp, _ := handleRequest(context.Background(), lambdaReq)

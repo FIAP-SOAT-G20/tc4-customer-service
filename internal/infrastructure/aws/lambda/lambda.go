@@ -12,6 +12,7 @@ import (
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/controller"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/gateway"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/presenter"
+	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/usecase"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/aws/lambda/request"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/aws/lambda/response"
@@ -76,7 +77,7 @@ func handleRequest(ctx context.Context, req events.APIGatewayProxyRequest) (even
 	}
 	err = json.Unmarshal(body, &customerRequest)
 	if err != nil {
-		return response.NewAPIGatewayProxyResponseError(err), nil
+		return response.NewAPIGatewayProxyResponseError(&domain.InvalidInputError{Message: err.Error()}), nil
 	}
 	customerInput := customerRequest.ToGetCustomerInput()
 	resp, err := customerController.Get(ctx, pr, customerInput)
