@@ -10,7 +10,6 @@ services:
       - "27017:27017"
     volumes:
       - db_data:/data/db
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - fastfood_10soat_g22_tc4_network
     healthcheck:
