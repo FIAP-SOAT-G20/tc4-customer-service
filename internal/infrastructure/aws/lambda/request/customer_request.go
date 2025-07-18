@@ -1,6 +1,6 @@
 package request
 
-import "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
+import "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
 
 type CustomerRequest struct {
 	CPF string `json:"cpf"`

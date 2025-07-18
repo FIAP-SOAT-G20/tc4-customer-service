@@ -101,7 +101,7 @@ This project is part of a larger system that includes:
 1. Clone the repository:
 
    ```bash
-      git clone https://github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf.git
+      git clone https://github.com/FIAP-SOAT-G20/tc4-customer-service.git
       cd fiap-tech-challenge-3-lambda-auth-tf
    ```
 

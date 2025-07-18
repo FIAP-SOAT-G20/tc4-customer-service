@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/aws/lambda"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/aws/lambda"
 )
 
 func init() {

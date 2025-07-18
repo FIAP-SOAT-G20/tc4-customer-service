@@ -12,9 +12,9 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
-	mockport "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port/mocks"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
+	mockport "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/port/mocks"
 )
 
 //go:embed golden/success_response.golden

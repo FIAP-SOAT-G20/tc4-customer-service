@@ -1,9 +1,10 @@
 package logger
 
 import (
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/config"
 	"log/slog"
 	"os"
+
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/config"
 )
 
 type Logger struct {

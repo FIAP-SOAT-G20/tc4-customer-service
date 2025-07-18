@@ -9,22 +9,22 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/controller"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/gateway"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/presenter"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/usecase"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/aws/lambda/request"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/aws/lambda/response"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/config"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/database"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/datasource"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/logger"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/service"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/adapter/controller"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/adapter/gateway"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/adapter/presenter"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/usecase"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/aws/lambda/request"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/aws/lambda/response"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/config"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/database"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/datasource"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/logger"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/service"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/port"
 )
 
 var customerDataSource port.CustomerDataSource

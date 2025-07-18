@@ -13,9 +13,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	entity "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain/entity"
-	dto "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
-	port "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port"
+	entity "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain/entity"
+	dto "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
+	port "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/port"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -1,9 +1,11 @@
 package service
 
 import (
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/config"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/config"
 
 	"github.com/golang-jwt/jwt/v5"
 )

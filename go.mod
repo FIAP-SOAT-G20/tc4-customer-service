@@ -1,4 +1,4 @@
-module github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf
+module github.com/FIAP-SOAT-G20/tc4-customer-service
 
 go 1.24.2
 

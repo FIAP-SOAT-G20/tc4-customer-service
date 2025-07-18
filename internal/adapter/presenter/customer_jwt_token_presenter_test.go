@@ -3,13 +3,16 @@ package presenter
 import (
 	"encoding/json"
 	"errors"
-	mock_port "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port/mocks"
-	"go.uber.org/mock/gomock"
 	"testing"
 
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain/entity"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
+	"go.uber.org/mock/gomock"
+
+	mock_port "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/port/mocks"
+
 	"github.com/stretchr/testify/require"
+
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain/entity"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
 )
 
 func TestCustomerJwtTokenPresenter_Present_Success(t *testing.T) {
@@ -19,7 +22,7 @@ func TestCustomerJwtTokenPresenter_Present_Success(t *testing.T) {
 	jwtService := mock_port.NewMockIAuthenticationService(ctrl)
 	presenter := NewCustomerJwtTokenPresenter(jwtService)
 
-	customer := &entity.Customer{ID: 999}
+	customer := &entity.Customer{ID: "999"}
 	jwtService.EXPECT().
 		GenerateToken("999").
 		Return("atoken", "Bearer", int64(12345), nil)
@@ -44,7 +47,7 @@ func TestCustomerJwtTokenPresenter_Present_GenerateTokenError(t *testing.T) {
 	jwtService := mock_port.NewMockIAuthenticationService(ctrl)
 	presenter := NewCustomerJwtTokenPresenter(jwtService)
 
-	customer := &entity.Customer{ID: 2}
+	customer := &entity.Customer{ID: "2"}
 	jwtService.EXPECT().
 		GenerateToken("2").
 		Return("", "", int64(0), errors.New("fail"))

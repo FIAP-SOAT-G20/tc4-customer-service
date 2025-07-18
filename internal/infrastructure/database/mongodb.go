@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/config"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/logger"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/config"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/logger"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

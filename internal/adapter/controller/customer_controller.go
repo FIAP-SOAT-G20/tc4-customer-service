@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/port"
 )
 
 type customerController struct {

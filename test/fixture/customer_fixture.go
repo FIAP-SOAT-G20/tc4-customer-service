@@ -1,7 +1,7 @@
 package fixture
 
 import (
-	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/domain/entity"
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain/entity"
 )
 
 var (
