@@ -14,8 +14,7 @@ MAIN_FILE=main.go
 VERSION=$(shell git describe --tags --always --dirty)
 TEST_PATH=./internal/...
 TEST_COVERAGE_FILE_NAME=coverage.out
-MIGRATION_PATH = internal/infrastructure/database/migrations
-DB_URL = postgres://postgres:postgres@localhost:5432/fastfood_10soat_g18_tc2?sslmode=disable
+MONGO_URI = mongodb://admin:admin@localhost:27017/fastfood_10soat_g22_tc4?authSource=admin
 LAMBDA_INPUT_FILE=test/data/api_gateway_proxy_request_event_payload_customer_not_found.json
 
 # Go commands
@@ -112,33 +111,10 @@ lint: ## 🔍 Run linter
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.7 run --out-format colored-line-number
 	@echo
 
-.PHONY: migrate-create
-migrate-create: ## 🔄 Create new migration, usage example: make migrate-create name=create_table_products
-	@echo "🟢 Creating new migration..."
-# if name is not passed, required argument
-ifndef name
-	$(error name is not set, usage example: make migrate-create name=create_table_products)
-endif
-	migrate create -ext sql -dir ${MIGRATION_PATH} -seq $(name)
-	@echo
-
-.PHONY: migrate-up
-migrate-up: ## ⬆️  Run migrations
-	@echo "🟢 Running migrations..."
-	migrate -path ${MIGRATION_PATH} -database "${DB_URL}" -verbose up
-	@echo
-
-.PHONY: migrate-down
-migrate-down: ## ⬇️  Roll back migrations
-	@echo "🔴 Rolling back migrations..."
-	migrate -path ${MIGRATION_PATH} -database "${DB_URL}" -verbose down
-	@echo
-
 .PHONY: install
 install: ## 📦 Install dependencies
 	@echo "🟢 Installing dependencies..."
 	go mod download
-	@go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.2
 	@go install github.com/blmayer/awslambdarpc@latest
 	@echo
 

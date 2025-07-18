@@ -10,15 +10,12 @@ import (
 )
 
 type Config struct {
-	// Database settings
-	DBHost         string
-	DBPort         int
-	DBUser         string
-	DBPassword     string
-	DBName         string
-	DBMaxOpenConns int
-	DBMaxIdleConns int
-	DBMaxLifetime  time.Duration
+	// MongoDB settings
+	MongoURI         string
+	MongoDatabase    string
+	MongoTimeout     time.Duration
+	MongoMaxPoolSize uint64
+	MongoMinPoolSize uint64
 
 	// Environment
 	Environment string
@@ -35,10 +32,9 @@ func LoadConfig() *Config {
 		log.Printf("Warning: .env file not found or error loading it: %v", err)
 	}
 
-	dbPort, _ := strconv.Atoi(getEnv("DB_PORT", "5432"))
-	dbMaxOpenConns, _ := strconv.Atoi(getEnv("DB_MAX_OPEN_CONNS", "25"))
-	dbMaxIdleConns, _ := strconv.Atoi(getEnv("DB_MAX_IDLE_CONNS", "25"))
-	dbMaxLifetime, _ := time.ParseDuration(getEnv("DB_CONN_MAX_LIFETIME", "5m"))
+	mongoTimeout, _ := time.ParseDuration(getEnv("MONGO_TIMEOUT", "10s"))
+	mongoMaxPoolSize, _ := strconv.ParseUint(getEnv("MONGO_MAX_POOL_SIZE", "100"), 10, 64)
+	mongoMinPoolSize, _ := strconv.ParseUint(getEnv("MONGO_MIN_POOL_SIZE", "5"), 10, 64)
 
 	// Environment
 	environment := getEnv("ENVIRONMENT", "development")
@@ -51,15 +47,12 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		// Database settings
-		DBHost:         getEnv("DB_HOST", "localhost"),
-		DBPort:         dbPort,
-		DBUser:         getEnv("DB_USER", "postgres"),
-		DBPassword:     getEnv("DB_PASSWORD", "postgres"),
-		DBName:         getEnv("DB_NAME", "fastfood_10soat_g18_tc2"),
-		DBMaxOpenConns: dbMaxOpenConns,
-		DBMaxIdleConns: dbMaxIdleConns,
-		DBMaxLifetime:  dbMaxLifetime,
+		// MongoDB settings
+		MongoURI:         getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoDatabase:    getEnv("MONGO_DATABASE", "fastfood_10soat_g22_tc4"),
+		MongoTimeout:     mongoTimeout,
+		MongoMaxPoolSize: mongoMaxPoolSize,
+		MongoMinPoolSize: mongoMinPoolSize,
 
 		// Environment
 		Environment: environment,

@@ -6,14 +6,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/mock/gomock"
 	"testing"
+
+	"go.uber.org/mock/gomock"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/dto"
-	mock_port "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port/mocks"
+	mockport "github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port/mocks"
 )
 
 //go:embed golden/success_response.golden
@@ -25,8 +26,8 @@ func TestHandleRequest_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockController := mock_port.NewMockCustomerController(ctrl)
-	mockPresenter := mock_port.NewMockPresenter(ctrl)
+	mockController := mockport.NewMockCustomerController(ctrl)
+	mockPresenter := mockport.NewMockPresenter(ctrl)
 
 	customerController = mockController
 	pr = mockPresenter
@@ -62,8 +63,8 @@ func TestHandleRequest_InvalidJSON(t *testing.T) {
 	invalidBody := "{ invalid json }"
 	req := events.APIGatewayProxyRequest{Body: invalidBody}
 
-	resp, err := handleRequest(context.Background(), req)
-	assert.Error(t, err)
+	resp, _ := handleRequest(context.Background(), req)
+	assert.Equal(t, 400, resp.StatusCode)
 	assert.Contains(t, resp.Body, "invalid character")
 }
 
@@ -71,7 +72,7 @@ func TestHandleRequest_ControllerError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockController := mock_port.NewMockCustomerController(ctrl)
+	mockController := mockport.NewMockCustomerController(ctrl)
 	customerController = mockController
 
 	reqInput := dto.GetCustomerInput{CPF: "wrong"}
@@ -88,7 +89,7 @@ func TestHandleRequest_ControllerError(t *testing.T) {
 		Return(nil, errors.New("not found")).
 		Times(1)
 
-	resp, err := handleRequest(context.Background(), lambdaReq)
-	assert.Error(t, err)
+	resp, _ := handleRequest(context.Background(), lambdaReq)
+	assert.Equal(t, 404, resp.StatusCode)
 	assert.Contains(t, resp.Body, "not found")
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-lambda-go/events"
+
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/controller"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/gateway"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/adapter/presenter"
@@ -18,10 +20,10 @@ import (
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/datasource"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/logger"
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/infrastructure/service"
-	"github.com/aws/aws-lambda-go/events"
+
+	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-lambda-auth-tf/internal/core/port"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 var customerDataSource port.CustomerDataSource
@@ -42,12 +44,12 @@ func init() {
 		return
 	}
 
-	db, err := database.NewPostgresConnection(cfg, l)
+	db, err := database.NewMongoConnection(cfg, l)
 	if err != nil {
 		panic(err)
 	}
 	jwtService := service.NewJWTService(cfg)
-	customerDataSource = datasource.NewCustomerDataSource(*db)
+	customerDataSource = datasource.NewCustomerDataSource(db)
 	customerGateway = gateway.NewCustomerGateway(customerDataSource)
 	customerUseCase = usecase.NewCustomerUseCase(customerGateway)
 	customerController = controller.NewCustomerController(customerUseCase)
@@ -64,7 +66,7 @@ func StartLambda() {
 func handleRequest(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	l.InfoContext(ctx, "Starting lambda handler", "isBase64Encoded", req.IsBase64Encoded, "body", req.Body)
 	var customerRequest request.CustomerRequest
-	var body []byte = []byte(req.Body)
+	var body = []byte(req.Body)
 	var err error
 	if req.IsBase64Encoded {
 		body, err = base64.StdEncoding.DecodeString(req.Body)
