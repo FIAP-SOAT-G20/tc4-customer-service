@@ -25,9 +25,6 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Go mod cache
-go.sum
-
 # Environment files
 .env
 .env.local
