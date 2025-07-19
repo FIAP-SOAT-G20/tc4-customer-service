@@ -163,7 +163,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Get() {
 	}{
 		{
 			name:  "should get customer successfully",
-			input: dto.GetCustomerInput{"123"},
+			input: dto.GetCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
@@ -181,7 +181,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Get() {
 		},
 		{
 			name:  "should return not found error when customer doesn't exist",
-			input: dto.GetCustomerInput{"123"},
+			input: dto.GetCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
@@ -195,7 +195,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Get() {
 		},
 		{
 			name:  "should return internal error when gateway fails",
-			input: dto.GetCustomerInput{"123"},
+			input: dto.GetCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
@@ -427,7 +427,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Delete() {
 	}{
 		{
 			name:  "should delete customer successfully",
-			input: dto.DeleteCustomerInput{"123"},
+			input: dto.DeleteCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
@@ -445,7 +445,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Delete() {
 		},
 		{
 			name:  "should return not found error when customer doesn't exist",
-			input: dto.DeleteCustomerInput{"123"},
+			input: dto.DeleteCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
@@ -459,7 +459,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Delete() {
 		},
 		{
 			name:  "should return error when gateway fails on find",
-			input: dto.DeleteCustomerInput{"123"},
+			input: dto.DeleteCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
@@ -473,7 +473,7 @@ func (s *CustomerUsecaseSuiteTest) TestCustomerUseCase_Delete() {
 		},
 		{
 			name:  "should return error when gateway fails on delete",
-			input: dto.DeleteCustomerInput{"123"},
+			input: dto.DeleteCustomerInput{ID: "123"},
 			setupMocks: func() {
 				s.mockGateway.EXPECT().
 					FindByID(s.ctx, "123").
