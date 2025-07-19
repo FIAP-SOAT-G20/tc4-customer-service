@@ -1,0 +1,36 @@
+{
+  "resource": "/customers/{id}",
+  "path": "/customers/60f1b2b3c4d5e6f7a8b9c0d1",
+  "httpMethod": "PUT",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "application/json"
+    ]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": {
+    "id": "60f1b2b3c4d5e6f7a8b9c0d1"
+  },
+  "stageVariables": {
+    "env": "test"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "customers",
+    "stage": "test",
+    "requestId": "update-customer-test",
+    "identity": {
+      "sourceIp": "127.0.0.1",
+      "userAgent": "Test Client"
+    },
+    "resourcePath": "/customers/{id}",
+    "httpMethod": "PUT",
+    "apiId": "test123"
+  },
+  "body": "{\"name\":\"João Silva Santos\",\"email\":\"joao.santos@email.com\"}",
+  "isBase64Encoded": false
+}
