@@ -1,0 +1,40 @@
+{
+  "resource": "/customers",
+  "path": "/customers",
+  "httpMethod": "GET",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "application/json"
+    ]
+  },
+  "queryStringParameters": {
+    "cpf": "123.456.789-00"
+  },
+  "multiValueQueryStringParameters": {
+    "cpf": [
+      "123.456.789-00"
+    ]
+  },
+  "pathParameters": null,
+  "stageVariables": {
+    "env": "test"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "customers",
+    "stage": "test",
+    "requestId": "get-customer-cpf-test",
+    "identity": {
+      "sourceIp": "127.0.0.1",
+      "userAgent": "Test Client"
+    },
+    "resourcePath": "/customers",
+    "httpMethod": "GET",
+    "apiId": "test123"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

@@ -31,15 +31,20 @@ func (cm *CustomerModel) ToEntity() *entity.Customer {
 }
 
 // FromEntity converts domain entity to MongoDB model
-func (cm *CustomerModel) FromEntity(customer *entity.Customer) {
+func FromEntity(customer *entity.Customer) *CustomerModel {
+	cm := &CustomerModel{
+		Name:      customer.Name,
+		Email:     customer.Email,
+		CPF:       customer.CPF,
+		CreatedAt: customer.CreatedAt,
+		UpdatedAt: customer.UpdatedAt,
+	}
+
 	if customer.ID != "" {
 		if objectID, err := primitive.ObjectIDFromHex(customer.ID); err == nil {
 			cm.ID = objectID
 		}
 	}
-	cm.Name = customer.Name
-	cm.Email = customer.Email
-	cm.CPF = customer.CPF
-	cm.CreatedAt = customer.CreatedAt
-	cm.UpdatedAt = customer.UpdatedAt
+
+	return cm
 }

@@ -72,6 +72,15 @@ trigger-lambda: ## ⚡  Trigger lambda with the input file stored in variable $L
 		'$(AWSLAMBDARPCCMD)' -a localhost:3300 -e $(LAMBDA_INPUT_FILE)
 	@echo
 
+mock: ## Generate mocks
+	@echo  "🟢 Generating mocks..."
+	@go install go.uber.org/mock/mockgen@latest
+	@mkdir -p internal/core/port/mocks
+	@rm -rf internal/core/port/mocks/*
+	@for file in internal/core/port/*.go; do \
+		mockgen -source=$$file -destination=internal/core/port/mocks/`basename $$file _port.go`_mock.go -package=mocks; \
+	done
+
 
 .PHONY: test
 test: lint ## 🧪 Run tests

@@ -12,3 +12,9 @@ type Customer struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+func (p *Customer) Update(name string, email string) {
+	p.Name = name
+	p.Email = email
+	p.UpdatedAt = time.Now()
+}

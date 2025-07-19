@@ -1,0 +1,44 @@
+{
+  "resource": "/customers",
+  "path": "/customers",
+  "httpMethod": "GET",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "application/json"
+    ]
+  },
+  "queryStringParameters": {
+    "page": "1",
+    "limit": "10"
+  },
+  "multiValueQueryStringParameters": {
+    "page": [
+      "1"
+    ],
+    "limit": [
+      "10"
+    ]
+  },
+  "pathParameters": null,
+  "stageVariables": {
+    "env": "test"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "customers",
+    "stage": "test",
+    "requestId": "list-customers-test",
+    "identity": {
+      "sourceIp": "127.0.0.1",
+      "userAgent": "Test Client"
+    },
+    "resourcePath": "/customers",
+    "httpMethod": "GET",
+    "apiId": "test123"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

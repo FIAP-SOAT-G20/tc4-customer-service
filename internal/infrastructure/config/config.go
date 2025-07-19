@@ -48,8 +48,8 @@ func LoadConfig() *Config {
 
 	return &Config{
 		// MongoDB settings
-		MongoURI:         getEnv("MONGO_URI", "mongodb://localhost:27017"),
-		MongoDatabase:    getEnv("MONGO_DATABASE", "fastfood_10soat_g22_tc4"),
+		MongoURI:         getEnv("MONGODB_URI", "mongodb://localhost:27017"),
+		MongoDatabase:    getEnv("MONGODB_DATABASE", "customer_service"),
 		MongoTimeout:     mongoTimeout,
 		MongoMaxPoolSize: mongoMaxPoolSize,
 		MongoMinPoolSize: mongoMinPoolSize,

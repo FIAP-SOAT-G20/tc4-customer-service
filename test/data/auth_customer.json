@@ -1,0 +1,34 @@
+{
+  "resource": "/auth",
+  "path": "/auth",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "application/json"
+    ]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": {
+    "env": "test"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "auth",
+    "stage": "test",
+    "requestId": "auth-customer-test",
+    "identity": {
+      "sourceIp": "127.0.0.1",
+      "userAgent": "Test Client"
+    },
+    "resourcePath": "/auth",
+    "httpMethod": "POST",
+    "apiId": "test123"
+  },
+  "body": "{\"cpf\":\"123.456.789-00\"}",
+  "isBase64Encoded": false
+}
