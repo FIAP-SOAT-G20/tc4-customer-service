@@ -1,0 +1,35 @@
+{
+  "resource": "/auth",
+  "path": "/auth",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {
+    "Accept": ["application/json", "text/plain"]
+  },
+  "queryStringParameters": {
+  },
+  "multiValueQueryStringParameters": {
+  },
+  "pathParameters": {
+  },
+  "stageVariables": {
+    "env": "prod"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "abcdef",
+    "stage": "prod",
+    "requestId": "c1234567-d89e-1234-a567-426614174000",
+    "identity": {
+      "sourceIp": "192.168.0.1",
+      "userAgent": "Custom User Agent String"
+    },
+    "resourcePath": "/example/resource",
+    "httpMethod": "POST",
+    "apiId": "xyz123"
+  },
+  "body": "eyJjcGYiOiAiMTIzLjQ1Ni43ODktMDAifQ==",
+  "isBase64Encoded": true
+}
