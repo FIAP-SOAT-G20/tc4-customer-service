@@ -32,6 +32,8 @@ jobs:
         run: go mod download
 
       - name: Run tests
+        env:
+          ENVIRONMENT: test
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Upload coverage reports
