@@ -1,20 +1,28 @@
-# Multi-stage build for AWS Lambda
+# Build stage
 FROM golang:1.24 AS build
+
 WORKDIR /app
 
-# Copy go.mod and go.sum
+# Copy only go.mod and go.sum to leverage Docker layer caching
 COPY go.mod go.sum ./
+
+# Download Go module dependencies
 RUN go mod download
 
-# Copy source code
+# Copy the rest of the application code
 COPY . .
 
-# Ensure all dependencies are in go.sum and build
+# Ensure go.sum is up to date
 RUN go mod tidy
 
+# Build the Go binary for AWS Lambda
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -ldflags="-w -s" -o main .
 
-# Copy artifacts to a clean image
+# Final image based on AWS Lambda custom runtime base
 FROM public.ecr.aws/lambda/provided:al2023
+
+# Copy the compiled binary from the build stage
 COPY --from=build /app/main ./main
-ENTRYPOINT [ "./main" ]
+
+# Set the Lambda entry point
+ENTRYPOINT ["./main"]
