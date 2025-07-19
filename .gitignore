@@ -60,6 +60,3 @@ terraform.rc
 
 # Generated files by terraform
 tf_generated/
-
-# Terraform variable files with sensitive data
-terraform.tfvars
