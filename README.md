@@ -49,11 +49,6 @@ This project is part of a larger system that includes:
 │     ├── datasource
 │     ├── logger
 │     └── service
-├── terraform
-│ ├── modules
-│ │   ├── apigateway
-│ │   └── lambda
-│   └── test
 └── fixture
 ```
 
@@ -67,7 +62,7 @@ This project is part of a larger system that includes:
 - Unit tests with testify and golden file responses
 - Error response standardization
 - Environment-based configuration
-- Terraform for AWS Lambda, API Gateway, IAM provisioning
+- AWS Lambda deployment via GitHub Actions
 
 ---
 
@@ -75,7 +70,6 @@ This project is part of a larger system that includes:
 
 - **Go**
 - **AWS Lambda**
-- **Terraform**
 - **Docker**
 - **Docker Compose**
 - **MongoDB**
@@ -92,7 +86,6 @@ This project is part of a larger system that includes:
 
 - Go 1.24+
 - AWS CLI
-- Terraform
 - Docker
 - MongoDB (for local development)
 
@@ -149,26 +142,18 @@ This project is part of a larger system that includes:
 
 ## 🏗️ Deployment
 
-Deployment is automated via a **GitHub Actions workflow**. When changes are pushed to the main branch (or as configured
-in your workflow), the pipeline will build and deploy the Lambda function and related infrastructure using Terraform.
+Deployment is automated via a **GitHub Actions workflow**. When changes are pushed to the main branch, the pipeline will
+build and deploy the Lambda function directly to AWS using the AWS CLI and SAM.
 
 **Prerequisite:**
-Before running `terraform plan` or `terraform apply` (either locally or via CI), ensure that all variables defined in
-`terraform/modules/lambda/ssm.tf` are created and initialized in your AWS environment. These variables are required for
-successful provisioning and configuration of the Lambda function and related resources.
-
-All the variables can be found on `env.example` file.
+Ensure that all required environment variables are configured in your AWS environment and GitHub Actions secrets. The
+required variables can be found in the `env.example` file.
 
 ## 📈 Testing
 
 Unit tests: make test
 Coverage: make coverage
 Golden files for output validation are found in internal/infrastructure/aws/lambda/golden/.
-
-## 🧩 Architecture
-
-The project follows Clean Architecture, dividing source code into distinct layers: Domain, UseCases, Adapters, and
-Infrastructure. See docs/architecture.drawio for the infrastructure diagram.
 
 ## 👏 Contributing
 
