@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain"
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain/entity"
@@ -29,7 +30,14 @@ func (uc *customerUseCase) List(ctx context.Context, i dto.ListCustomersInput) (
 
 // Create creates a new Customer
 func (uc *customerUseCase) Create(ctx context.Context, i dto.CreateCustomerInput) (*entity.Customer, error) {
-	customer := i.ToEntity()
+	now := time.Now()
+	customer := &entity.Customer{
+		Name:      i.Name,
+		Email:     i.Email,
+		CPF:       i.CPF,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
 
 	if err := uc.gateway.Create(ctx, customer); err != nil {
 		return nil, domain.NewInternalError(err)
