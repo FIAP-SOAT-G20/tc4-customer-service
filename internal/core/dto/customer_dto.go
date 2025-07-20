@@ -1,19 +1,9 @@
 package dto
 
-import "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain/entity"
-
 type CreateCustomerInput struct {
 	Name  string
 	Email string
 	CPF   string
-}
-
-func (i CreateCustomerInput) ToEntity() *entity.Customer {
-	return &entity.Customer{
-		Name:  i.Name,
-		Email: i.Email,
-		CPF:   i.CPF,
-	}
 }
 
 type UpdateCustomerInput struct {
