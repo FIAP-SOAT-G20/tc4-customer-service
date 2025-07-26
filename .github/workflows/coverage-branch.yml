@@ -69,15 +69,11 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Check if coverage branch exists
-          if git ls-remote --heads origin coverage; then
-            git fetch origin coverage
-            git checkout coverage
-            git rm -rf . || true
-          else
-            git checkout --orphan coverage
-            git rm -rf . || true
-          fi
+          # Create or switch to coverage branch
+          git checkout --orphan coverage
+          
+          # Clean working directory
+          git rm -rf . 2>/dev/null || true
           
           # Copy coverage files
           cp coverage.out .
@@ -87,7 +83,7 @@ jobs:
           
           # Add and commit coverage files
           git add .
-          git commit -m "Update coverage report - $(date -u)" || echo "No changes to commit"
+          git commit -m "Update coverage report - $(date -u)"
           
           # Push to coverage branch
           git push origin coverage
