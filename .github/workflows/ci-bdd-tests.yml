@@ -2,7 +2,7 @@ name: ci/bdd-tests
 
 on:
   workflow_run:
-    workflows: [ "ci/unit-tests", "ci/linter", "ci/security-checks", "ci/integration-tests" ]
+    workflows: [ "ci/integration-tests" ]
     types: [ completed ]
     branches: [ main ]
   pull_request:
@@ -15,7 +15,9 @@ permissions:
 jobs:
   godog:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'pull_request' }}
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      github.event_name == 'pull_request'
 
     services:
       mongodb:
