@@ -5,27 +5,27 @@
 [![Go Version](https://img.shields.io/badge/go-1.24.2-blue.svg)](https://golang.org/dl/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## 💬 Visão Geral
+## 💬 Overview
 
-Este projeto implementa um serviço de autenticação e gerenciamento de clientes serverless usando Go, Clean Architecture,
-AWS Lambda e AWS API Gateway. O serviço recebe credenciais de clientes, valida-as e retorna um token JWT assinado após
-autenticação bem-sucedida. A arquitetura permite escalabilidade, manutenibilidade e testabilidade.
+This project implements a serverless customer authentication and management service using Go, Clean Architecture,
+and AWS Lambda. The service receives customer credentials, validates them, and returns a signed JWT token after
+successful authentication. The architecture enables scalability, maintainability, and testability.
 
-### Principais Funcionalidades
+### Key Features
 
-- Autenticação de clientes via email e senha
-- Geração segura de JWT para sessões autenticadas
-- CRUD completo de clientes
-- Separação por Clean Architecture (domain, use cases, adapters, infrastructure)
-- Testes unitários com testify e golden file responses
-- Padronização de respostas de erro
-- Configuração baseada em ambiente
+- Customer authentication via email and password
+- Secure JWT generation for authenticated sessions
+- Complete customer CRUD operations
+- Clean Architecture separation (domain, use cases, adapters, infrastructure)
+- Unit tests with testify and golden file responses
+- Standardized error responses
+- Environment-based configuration
 
 ---
 
-## 🏗️ Tecnologias e Estrutura
+## 🏗️ Technologies and Structure
 
-### Estrutura do Projeto
+### Project Structure
 
 ```bash
 ├── bin/                    # Compiled binaries
@@ -47,181 +47,189 @@ autenticação bem-sucedida. A arquitetura permite escalabilidade, manutenibilid
 │     ├── datasource/       # Data access layer
 │     ├── logger/           # Logging utilities
 │     └── service/          # External services
-├── terraform/              # Infrastructure as Code
-│ └── modules/              # Terraform modules
 └── test/                   # Test data and fixtures
 ```
 
-### Tecnologias
+### Technologies
 
-- **Go 1.24.2** - Linguagem de programação
-- **AWS Lambda** - Plataforma serverless
-- **AWS API Gateway** - Gerenciamento de API
-- **Amazon ECR** - Registry de containers
-- **MongoDB** - Banco de dados NoSQL
-- **Terraform** - Infrastructure as Code
-- **Docker** - Containerização
-- **GitHub Actions** - Pipeline CI/CD
-- **JWT** - Tokens de autenticação
-- **Testify** - Framework de testes
-- **golangci-lint** - Linting de código
+- **Go 1.24.2** - Programming language
+- **AWS Lambda** - Serverless platform
+- **Amazon ECR** - Container registry
+- **MongoDB** - NoSQL database
+- **Docker** - Containerization
+- **GitHub Actions** - CI/CD pipeline
+- **JWT** - Authentication tokens
+- **Testify** - Testing framework
+- **golangci-lint** - Code linting
 
 ---
 
-## 🚀 Início Rápido
+## 🚀 Quick Start
 
-### Pré-requisitos
+### Prerequisites
 
 - Go 1.24.2+
 - AWS CLI
-- Terraform
 - Docker
 - MongoDB
 
-### Instalação e Execução
+### Installation and Execution
 
-1. **Clone o repositório:**
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/FIAP-SOAT-G20/tc4-customer-service.git
    cd tc4-customer-service
    ```
 
-2. **Configure as variáveis de ambiente:**
+2. **Configure environment variables:**
 
    ```bash
    cp env.example .env
-   # Edite .env conforme necessário 
+   # Edit .env as needed
    ```
 
-3. **Instale as dependências:**
+3. **Install dependencies:**
 
    ```bash
    make install
    ```
 
-4. **Inicie o ambiente de desenvolvimento:**
+4. **Start development environment:**
 
    ```bash
-   # Inicia o banco de dados
+   # Start database
    make compose-up
    
-   # Inicia o lambda
+   # Start lambda
    make start-lambda
    ```
 
-5. **Teste o lambda:**
+5. **Test the lambda:**
 
    ```bash
    make trigger-lambda 
    ```
 
-### Comandos Disponíveis
+### Lambda Trigger Commands
+
+You can trigger different lambda endpoints using predefined test events:
 
 ```bash
-make help          # Mostra todos os comandos disponíveis
-make build         # Compila a aplicação
-make test          # Executa os testes
-make coverage      # Gera relatório de coverage
-make lint          # Executa linter
-make scan          # Executa scan de segurança
-make package       # Empacota para deploy
-make compose-up    # Inicia ambiente local
-make compose-down  # Para ambiente local
+# Default trigger (customer not found scenario)
+make trigger-lambda
+
+# Authentication
+LAMBDA_INPUT_FILE=test/data/auth_customer.json make trigger-lambda
+
+# Customer CRUD operations
+LAMBDA_INPUT_FILE=test/data/create_customer.json make trigger-lambda
+LAMBDA_INPUT_FILE=test/data/get_customer_by_id.json make trigger-lambda
+LAMBDA_INPUT_FILE=test/data/get_customer_by_cpf.json make trigger-lambda
+LAMBDA_INPUT_FILE=test/data/update_customer.json make trigger-lambda
+LAMBDA_INPUT_FILE=test/data/delete_customer.json make trigger-lambda
+LAMBDA_INPUT_FILE=test/data/list_customers.json make trigger-lambda
+
+# Edge cases
+LAMBDA_INPUT_FILE=test/data/api_gateway_proxy_request_event_payload_empty_cpf.json make trigger-lambda
+```
+
+### Available Commands
+
+```bash
+make help          # Show all available commands
+make build         # Build the application
+make test          # Run tests
+make coverage      # Generate coverage report
+make lint          # Run linter
+make scan          # Run security scan
+make package       # Package for deployment
+make compose-up    # Start local environment
+make compose-down  # Stop local environment
 ```
 
 ---
 
-## 📝 API e Documentação
+## 📝 API Documentation
 
-### Endpoints Disponíveis
+### Available Endpoints
 
-| Método   | Endpoint               | Descrição                           |
-|----------|------------------------|-------------------------------------|
-| `POST`   | `/auth`                | Autentica cliente com email e senha |
-| `GET`    | `/customers/{id}`      | Busca cliente por ID                |
-| `GET`    | `/customers/cpf/{cpf}` | Busca cliente por CPF               |
-| `GET`    | `/customers`           | Lista todos os clientes             |
-| `POST`   | `/customers`           | Cria novo cliente                   |
-| `PUT`    | `/customers/{id}`      | Atualiza cliente                    |
-| `DELETE` | `/customers/{id}`      | Remove cliente                      |
+| Method   | Endpoint               | Description                                   |
+|----------|------------------------|-----------------------------------------------|
+| `POST`   | `/auth`                | Authenticate customer with email and password |
+| `GET`    | `/customers/{id}`      | Get customer by ID                            |
+| `GET`    | `/customers/cpf/{cpf}` | Get customer by CPF                           |
+| `GET`    | `/customers`           | List all customers                            |
+| `POST`   | `/customers`           | Create new customer                           |
+| `PUT`    | `/customers/{id}`      | Update customer                               |
+| `DELETE` | `/customers/{id}`      | Delete customer                               |
 
 ---
 
-## 🧪 Testes e Qualidade
+## 🧪 Testing and Quality
 
-### Execução de Testes
+### Running Tests
 
 ```bash
-# Executa todos os testes com detecção de race condition
+# Run all tests with race condition detection
 make test
 
-# Gera relatório de coverage (abre no browser)
+# Generate coverage report (opens in browser)
 make coverage
 
-# Executa linter
+# Run linter
 make lint
 
-# Executa scan de vulnerabilidades
+# Run vulnerability scan
 make scan
 ```
 
-## 🏗️ Deploy e CI/CD
+## 🏗️ Deploy and CI/CD
 
-### Pipeline Automatizado
+### Automated Pipeline
 
-1. **Tests workflow** - Executa em todo push/PR para branch main
-2. **Build and Deploy workflow** - Dispara após testes bem-sucedidos
+1. **Tests workflow** - Runs on every push/PR to main branch
+2. **Build and Deploy workflow** - Triggers after successful tests
 
-### Processo de Deploy
+### Deploy Process
 
-- **Testes**: Testes automatizados com upload de coverage para Codecov
-- **Linting**: Verificações de qualidade de código
-- **Security**: Scan de vulnerabilidades
-- **Build**: Criação de imagem Docker e push para ECR
-- **Deploy**: Deploy automatizado para AWS Lambda
+- **Testing**: Automated tests with coverage upload to Codecov
+- **Linting**: Code quality checks
+- **Security**: Vulnerability scanning
+- **Build**: Docker image creation and push to ECR
+- **Deploy**: Automated deployment to AWS Lambda
 
-### Pré-requisitos para Deploy
+### Deploy Prerequisites
 
-- Credenciais AWS configuradas nos GitHub Secrets
-- Repositório ECR será criado automaticamente se não existir
-
-### Deploy Local com Terraform
-
-```bash
-cd terraform
-terraform init
-terraform plan
-terraform apply
-```
+- AWS credentials configured in GitHub Secrets
+- ECR repository will be created automatically if it doesn't exist
 
 ---
 
-## 🔗 Projetos Relacionados
+## 🔗 Related Projects
 
-Este projeto faz parte de um sistema maior que inclui:
+This project is part of a larger system that includes:
 
-- **[Infrastructure (Terraform)](https://github.com/FIAP-SOAT-G20/tc4-infrastructure-tf)** - Infrastructure as Code para
-  recursos AWS
-- **[Customer Service](https://github.com/FIAP-SOAT-G20/tc4-customer-service)** - Serviço de autenticação e
-  gerenciamento de clientes
-- **[Payment Service](https://github.com/FIAP-SOAT-G20/tc4-payment-service)** - Serviço de processamento de pagamentos
-- **[Kitchen Service](https://github.com/FIAP-SOAT-G20/tc4-kitchen-service)** - Serviço de operações da cozinha e
-  gerenciamento de pedidos
-- **[Kubernetes Deploy](https://github.com/FIAP-SOAT-G20/tc4-infrastructure-deploy)** - Configurações de deploy no
-  Kubernetes
+- **[Infrastructure (Terraform)](https://github.com/FIAP-SOAT-G20/tc4-infrastructure-tf)** - Infrastructure as Code for
+  AWS resources
+- **[Customer Service](https://github.com/FIAP-SOAT-G20/tc4-customer-service)** - Customer authentication and
+  management service
+- **[Payment Service](https://github.com/FIAP-SOAT-G20/tc4-payment-service)** - Payment processing service
+- **[Kitchen Service](https://github.com/FIAP-SOAT-G20/tc4-kitchen-service)** - Kitchen operations and
+  order management service
+- **[Kubernetes Deploy](https://github.com/FIAP-SOAT-G20/tc4-infrastructure-deploy)** - Kubernetes deployment
+  configurations
 
 ---
 
-## 📚 Documentação de Referência
+## 📚 Reference Documentation
 
 - [Best practices writing lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html)
 - [Code best practices for Go Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html#go-best-practices)
 - [Running and debugging lambda locally](https://medium.com/nagoya-foundation/running-and-debugging-go-lambda-functions-locally-156893e4ed0d)
-- [Setting Up VPC and Lambda Function with Terraform](https://dev.to/sepiyush/setting-up-vpc-and-lambda-function-with-terraform-3m9d)
 - [MongoDB Go Driver Documentation](https://www.mongodb.com/docs/drivers/go/current/)
 - [MongoDB Best Practices](https://www.mongodb.com/developer/products/mongodb/mongodb-schema-design-best-practices/)
 
-## 📄 Licença
+## 📄 License
 
 MIT License
