@@ -70,7 +70,10 @@ jobs:
           fi
           
           # Extract coverage report safely (without fromJSON to avoid parsing errors)
-          COVERAGE_REPORT="${{ steps.coverage.outputs.report }}"
+          # Store the report in a file first to avoid shell interpretation issues
+          echo '${{ steps.coverage.outputs.report }}' > coverage_report_raw.txt
+          # Read the file content into the variable
+          COVERAGE_REPORT=$(cat coverage_report_raw.txt)
           
           # Create enhanced coverage summary
           cat > coverage_summary.md << EOF
@@ -122,6 +125,9 @@ jobs:
         with:
           message: ${{ steps.coverage-summary.outputs.SUMMARY_CONTENT }}
           comment_tag: coverage-report
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          mode: upsert
+          create_if_not_exists: true
 
       - name: "finally check coverage"
         if: steps.coverage.outcome == 'failure'
