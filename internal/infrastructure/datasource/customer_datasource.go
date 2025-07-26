@@ -33,10 +33,15 @@ func NewCustomerDataSource(db *database.MongoDatabase) port.CustomerDataSource {
 func (ds *customerDataSource) FindByID(ctx context.Context, id string) (*entity.Customer, error) {
 	startTime := time.Now()
 
-	mongoFilter := bson.M{"_id": id}
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	mongoFilter := bson.M{"_id": objectID}
 
 	var customerModel model.CustomerModel
-	err := ds.collection.FindOne(ctx, mongoFilter).Decode(&customerModel)
+	err = ds.collection.FindOne(ctx, mongoFilter).Decode(&customerModel)
 
 	duration := time.Since(startTime)
 	ds.db.LogOperation(ctx, "FindByID", customersCollection, duration, err)
@@ -140,11 +145,16 @@ func (ds *customerDataSource) Create(ctx context.Context, customer *entity.Custo
 func (ds *customerDataSource) Update(ctx context.Context, customer *entity.Customer) error {
 	startTime := time.Now()
 
+	objectID, err := primitive.ObjectIDFromHex(customer.ID)
+	if err != nil {
+		return err
+	}
+
 	customerModel := model.FromEntity(customer)
-	filter := bson.M{"_id": customer.ID}
+	filter := bson.M{"_id": objectID}
 	update := bson.M{"$set": customerModel}
 
-	_, err := ds.collection.UpdateOne(ctx, filter, update)
+	_, err = ds.collection.UpdateOne(ctx, filter, update)
 
 	duration := time.Since(startTime)
 	ds.db.LogOperation(ctx, "Update", customersCollection, duration, err)
@@ -155,8 +165,13 @@ func (ds *customerDataSource) Update(ctx context.Context, customer *entity.Custo
 func (ds *customerDataSource) Delete(ctx context.Context, id string) error {
 	startTime := time.Now()
 
-	filter := bson.M{"_id": id}
-	_, err := ds.collection.DeleteOne(ctx, filter)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": objectID}
+	_, err = ds.collection.DeleteOne(ctx, filter)
 
 	duration := time.Since(startTime)
 	ds.db.LogOperation(ctx, "Delete", customersCollection, duration, err)

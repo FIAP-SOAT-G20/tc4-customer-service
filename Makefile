@@ -91,6 +91,12 @@ test: lint ## 🧪 Run tests
 	$(GOTEST) $(TEST_PATH) -race -v
 	@echo
 
+.PHONY: bdd-test
+bdd-test: ## 🥒 Run BDD tests with Godog
+	@echo "🟢 Running BDD tests..."
+	cd test/bdd && $(GOCMD) test -v
+	@echo
+
 .PHONY: coverage
 coverage: ## 🧪 Run tests with coverage
 	@echo  "🟢 Running tests with coverage..."
