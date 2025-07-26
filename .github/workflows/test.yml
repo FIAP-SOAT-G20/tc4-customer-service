@@ -61,11 +61,6 @@ jobs:
           file: ./coverage.out
           fail_ci_if_error: false
 
-      - name: Save coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-reports
-          path: coverage.out
 
       - name: Run linter
         uses: golangci/golangci-lint-action@v6
