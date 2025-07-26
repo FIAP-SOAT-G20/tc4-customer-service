@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
 
@@ -44,6 +45,11 @@ func init() {
 	l = logger.NewLogger(cfg)
 
 	if cfg.Environment == "test" {
+		return
+	}
+
+	// Skip initialization during test execution
+	if testing.Testing() {
 		return
 	}
 

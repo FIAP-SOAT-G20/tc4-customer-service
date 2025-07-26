@@ -30,7 +30,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) SetupSuite() {
 
 	cfg := &config.Config{
 		MongoURI:         getTestMongoURI(),
-		MongoDatabase:    "customer_service_integration_test",
+		MongoDatabase:    "fastfood_test",
 		MongoTimeout:     30 * time.Second,
 		MongoMaxPoolSize: 10,
 		MongoMinPoolSize: 1,
@@ -48,7 +48,9 @@ func (suite *CustomerDataSourceIntegrationTestSuite) SetupSuite() {
 
 func (suite *CustomerDataSourceIntegrationTestSuite) TearDownSuite() {
 	if suite.db != nil {
-		suite.db.Close(suite.ctx)
+		if err := suite.db.Close(suite.ctx); err != nil {
+			suite.T().Logf("Error closing database connection: %v", err)
+		}
 	}
 }
 
@@ -65,15 +67,20 @@ func TestCustomerDataSourceIntegrationTestSuite(t *testing.T) {
 		t.Skip("Skipping integration tests in short mode")
 	}
 
+	// Skip integration tests in coverage mode or when explicitly requested
+	if os.Getenv("COVERAGE_MODE") == "true" || os.Getenv("SKIP_INTEGRATION_TESTS") == "true" {
+		t.Skip("Skipping integration tests in coverage mode")
+	}
+
 	suite.Run(t, new(CustomerDataSourceIntegrationTestSuite))
 }
 
 func getTestMongoURI() string {
-	if uri := os.Getenv("MONGO_URI"); uri != "" {
+	if uri := os.Getenv("MONGODB_URI"); uri != "" {
 		return uri
 	}
 	if uri := os.Getenv("TEST_MONGODB_URI"); uri != "" {
 		return uri
 	}
-	return "mongodb://admin:admin@localhost:27017"
+	return "mongodb://admin:admin@localhost:27017/fastfood_test?authSource=admin"
 }

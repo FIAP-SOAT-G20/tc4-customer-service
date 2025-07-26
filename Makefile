@@ -91,6 +91,21 @@ test: lint ## 🧪 Run tests
 	$(GOTEST) $(TEST_PATH) -race -v
 	@echo
 
+.PHONY: unit-test
+unit-test: ## 🧪 Run unit tests only
+	@echo  "🟢 Running unit tests..."
+	@$(GOFMT) ./...
+	@$(GOVET) ./...
+	@$(GOTIDY)
+	$(GOTEST) ./internal/core/... ./internal/adapter/... -race -v
+	@echo
+
+.PHONY: integration-test
+integration-test: ## 🧪 Run integration tests only
+	@echo  "🟢 Running integration tests..."
+	$(GOTEST) ./internal/infrastructure/datasource/ -race -v
+	@echo
+
 .PHONY: bdd-test
 bdd-test: ## 🥒 Run BDD tests with Godog
 	@echo "🟢 Running BDD tests..."
