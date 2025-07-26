@@ -68,7 +68,11 @@ jobs:
           fi
           
           # Extract coverage percentage from report if available
-          COVERAGE_REPORT="${{ fromJSON(steps.coverage.outputs.report) }}"
+          if [ -n "${{ steps.coverage.outputs.report }}" ]; then
+            COVERAGE_REPORT="${{ steps.coverage.outputs.report }}"
+          else
+            COVERAGE_REPORT="Coverage report not available"
+          fi
           
           # Create enhanced coverage summary
           cat > coverage_summary.md << EOF
