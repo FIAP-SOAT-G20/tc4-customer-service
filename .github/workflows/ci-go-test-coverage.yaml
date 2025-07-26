@@ -67,8 +67,8 @@ jobs:
             COVERAGE_RESULT="Coverage requirements not met"
           fi
           
-          # Extract coverage percentage from report if available
-          COVERAGE_REPORT="${{ fromJSON(steps.coverage.outputs.report) }}"
+          # Extract coverage report safely (without fromJSON to avoid parsing errors)
+          COVERAGE_REPORT="${{ steps.coverage.outputs.report }}"
           
           # Create enhanced coverage summary
           cat > coverage_summary.md << EOF
@@ -82,7 +82,7 @@ jobs:
           $COVERAGE_REPORT
           \`\`\`
           
-          ### � Coverage Requirements:
+          ### 📋 Coverage Requirements:
           - **Minimum Threshold:** 80%
           - **Coverage Profile:** ./cover.out
           - **Coverage Mode:** atomic
@@ -93,7 +93,7 @@ jobs:
           - **Timeout:** 1 minute
           - **Test Packages:** All packages (./...)
           
-          ### � Excluded from Coverage:
+          ### 📝 Excluded from Coverage:
           - Mock files (\`*_mock.go\`)
           - Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)
           - Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)
@@ -107,19 +107,19 @@ jobs:
           # Also add to step summary
           cat coverage_summary.md >> $GITHUB_STEP_SUMMARY
           
-          # Set output for PR comment
-          echo "SUMMARY_CONTENT<<EOF" >> $GITHUB_OUTPUT
-          cat coverage_summary.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Set output for PR comment using multiline format
+          {
+            echo "SUMMARY_CONTENT<<EOF"
+            cat coverage_summary.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: 💬 Comment coverage report on PR
         if: always() && github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v3
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-tag: coverage-report
           message: ${{ steps.coverage-summary.outputs.SUMMARY_CONTENT }}
-
+          comment_tag: coverage-report
 
       - name: "finally check coverage"
         if: steps.coverage.outcome == 'failure'
