@@ -77,46 +77,48 @@ jobs:
           fi
           
           # Create enhanced coverage summary
-          cat > coverage_summary.md << EOF
-          ## 📊 Test Coverage Report
-          
-          **Status:** $COVERAGE_STATUS  
-          **Result:** $COVERAGE_RESULT
-          
-          ### 🎯 Coverage Details:
-          \`\`\`
-          $COVERAGE_REPORT
-          \`\`\`
-          
-          ### 📋 Coverage Requirements:
-          - **Minimum Threshold:** 80%
-          - **Coverage Profile:** ./cover.out
-          - **Coverage Mode:** atomic
-          
-          ### 🔧 Test Configuration:
-          - **Go Version:** ${{ matrix.go-version }}
-          - **Race Detection:** ✅ enabled
-          - **Timeout:** 1 minute
-          - **Test Packages:** All packages (./...)
-          
-          ### Excluded from Coverage:
-          - Mock files (\`*_mock.go\`)
-          - Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)
-          - Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)
-          - Documentation and configuration files
-          - Value objects and domain entities
-          
-          ---
-          _Automated test coverage ensures code quality and identifies untested business logic._
-          EOF
+          {
+            echo "## 📊 Test Coverage Report"
+            echo ""
+            echo "**Status:** $COVERAGE_STATUS"
+            echo "**Result:** $COVERAGE_RESULT"
+            echo ""
+            echo "### 🎯 Coverage Details:"
+            echo '```'
+            echo "$COVERAGE_REPORT"
+            echo '```'
+            echo ""
+            echo "### 📋 Coverage Requirements:"
+            echo "- **Minimum Threshold:** 80%"
+            echo "- **Coverage Profile:** ./cover.out"
+            echo "- **Coverage Mode:** atomic"
+            echo ""
+            echo "### 🔧 Test Configuration:"
+            echo "- **Go Version:** ${{ matrix.go-version }}"
+            echo "- **Race Detection:** ✅ enabled"
+            echo "- **Timeout:** 1 minute"
+            echo "- **Test Packages:** All packages (./...)"
+            echo ""
+            echo "### Excluded from Coverage:"
+            echo "- Mock files (\`*_mock.go\`)"
+            echo "- Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)"
+            echo "- Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)"
+            echo "- Documentation and configuration files"
+            echo "- Value objects and domain entities"
+            echo ""
+            echo "---"
+            echo "_Automated test coverage ensures code quality and identifies untested business logic._"
+          } > coverage_summary.md
           
           # Also add to step summary
           cat coverage_summary.md >> $GITHUB_STEP_SUMMARY
           
           # Set output for PR comment
-          echo "SUMMARY_CONTENT<<EOF" >> $GITHUB_OUTPUT
-          cat coverage_summary.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "SUMMARY_CONTENT<<COVERAGE_EOF"
+            cat coverage_summary.md
+            echo "COVERAGE_EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Comment coverage report on PR
         if: always() && github.event_name == 'pull_request'
@@ -125,7 +127,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-tag: coverage-report
           message: ${{ steps.coverage-summary.outputs.SUMMARY_CONTENT }}
-
 
       - name: "finally check coverage"
         if: steps.coverage.outcome == 'failure'
