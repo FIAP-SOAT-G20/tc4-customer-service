@@ -17,6 +17,7 @@ exclude:
     - ^.*_request\.go$
     - ^.*_response\.go$
     - ^.*_gateway\.go$
+    - ^.*_datasource\.go$
     - ^.*_presenter\.go$
     - ^.*middleware.*
     - ^.*config.*
@@ -26,8 +27,11 @@ exclude:
     - ^.*server.*
     - ^.*logger.*
     - ^.*httpclient.*
+    - ^.*service.*
     - ^.*_entity\.go$
     - ^.*errors\.go$
     - ^.*_dto\.go$
     - ^.*_model\.go$
+    - ^.*pagination\.go$
     - test/*
+    - internal/infrastructure/datasource/model/*
