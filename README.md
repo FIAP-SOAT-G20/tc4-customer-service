@@ -1,187 +1,219 @@
 # Fast Food FIAP Tech Challenge 4 - Customer Service
 
-## 💬 About
+[![Tests](https://github.com/FIAP-SOAT-G20/tc4-customer-service/workflows/Tests/badge.svg)](https://github.com/FIAP-SOAT-G20/tc4-customer-service/actions/workflows/test.yml)
+[![Build and Deploy](https://github.com/FIAP-SOAT-G20/tc4-customer-service/workflows/Build%20and%20Deploy/badge.svg)](https://github.com/FIAP-SOAT-G20/tc4-customer-service/actions/workflows/build-deploy.yml)
+[![Go Version](https://img.shields.io/badge/go-1.24.2-blue.svg)](https://golang.org/dl/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-This project implements a serverless authentication service using Go, Clean Architecture, AWS Lambda and AWS API
-Gateway. The service receives customer credentials, validates them, and returns a signed JWT token upon successful
-authentication. The architecture enables scalability, maintainability, and testability.
+## 💬 Visão Geral
 
-## 🔗 Related Projects
+Este projeto implementa um serviço de autenticação e gerenciamento de clientes serverless usando Go, Clean Architecture,
+AWS Lambda e AWS API Gateway. O serviço recebe credenciais de clientes, valida-as e retorna um token JWT assinado após
+autenticação bem-sucedida. A arquitetura permite escalabilidade, manutenibilidade e testabilidade.
 
-This project is part of a larger system that includes:
+### Principais Funcionalidades
 
-- [Database Infrastructure (Terraform)](https://github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-db-tf) - Infrastructure
-  as Code for MongoDB Atlas using Terraform
-- [Kubernetes Infrastructure (Terraform)](https://github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-k8s-tf) -
-  Infrastructure as Code for EKS cluster and Kubernetes resources using Terraform
-- [API Service](https://github.com/FIAP-SOAT-G20/fiap-tech-challenge-3-api) - Main backend service implementing the Fast
-  Food ordering system
+- Autenticação de clientes via email e senha
+- Geração segura de JWT para sessões autenticadas
+- CRUD completo de clientes
+- Separação por Clean Architecture (domain, use cases, adapters, infrastructure)
+- Testes unitários com testify e golden file responses
+- Padronização de respostas de erro
+- Configuração baseada em ambiente
 
 ---
 
-## 📁 Folder Structure
+## 🏗️ Tecnologias e Estrutura
+
+### Estrutura do Projeto
 
 ```bash
-├── bootstrap
-├── docs
-│ └── architecture.drawio
-├── internal
-│ ├── adapter
-│ │ ├── controller
-│ │ ├── gateway
-│ │ └── presenter
-│ ├── core
-│ │ ├── domain
-│ │ │ ├── entity
-│ │ │ └── errors.go
-│ │ ├── dto
-│ │ ├── port
-│ │ │ └── mocks
-│ │ └── usecase
-│ └── infrastructure
-│     ├── aws
-│     │ └── lambda
-│     │     ├── golden
-│     │     ├── request
-│     │     └── response
-│     ├── config
-│     ├── database
-│     ├── datasource
-│     ├── logger
-│     └── service
-├── terraform
-│ ├── modules
-│ │   ├── apigateway
-│ │   └── lambda
-│   └── test
-└── fixture
+├── bin/                    # Compiled binaries
+├── dist/                   # Distribution files
+├── internal/               # Private application code
+│ ├── adapter/              # External interface adapters
+│ │ ├── controller/         # HTTP handlers
+│ │ ├── gateway/            # External service interfaces
+│ │ └── presenter/          # Response formatters
+│ ├── core/                 # Business logic
+│ │ ├── domain/             # Domain entities and rules
+│ │ ├── dto/                # Data transfer objects
+│ │ ├── port/               # Interfaces and mocks
+│ │ └── usecase/            # Business use cases
+│ └── infrastructure/       # External concerns
+│     ├── aws/lambda/       # AWS Lambda integration
+│     ├── config/           # Configuration management
+│     ├── database/         # Database connections
+│     ├── datasource/       # Data access layer
+│     ├── logger/           # Logging utilities
+│     └── service/          # External services
+├── terraform/              # Infrastructure as Code
+│ └── modules/              # Terraform modules
+└── test/                   # Test data and fixtures
+```
+
+### Tecnologias
+
+- **Go 1.24.2** - Linguagem de programação
+- **AWS Lambda** - Plataforma serverless
+- **AWS API Gateway** - Gerenciamento de API
+- **Amazon ECR** - Registry de containers
+- **MongoDB** - Banco de dados NoSQL
+- **Terraform** - Infrastructure as Code
+- **Docker** - Containerização
+- **GitHub Actions** - Pipeline CI/CD
+- **JWT** - Tokens de autenticação
+- **Testify** - Framework de testes
+- **golangci-lint** - Linting de código
+
+---
+
+## 🚀 Início Rápido
+
+### Pré-requisitos
+
+- Go 1.24.2+
+- AWS CLI
+- Terraform
+- Docker
+- MongoDB
+
+### Instalação e Execução
+
+1. **Clone o repositório:**
+
+   ```bash
+   git clone https://github.com/FIAP-SOAT-G20/tc4-customer-service.git
+   cd tc4-customer-service
+   ```
+
+2. **Configure as variáveis de ambiente:**
+
+   ```bash
+   cp env.example .env
+   # Edite .env conforme necessário 
+   ```
+
+3. **Instale as dependências:**
+
+   ```bash
+   make install
+   ```
+
+4. **Inicie o ambiente de desenvolvimento:**
+
+   ```bash
+   # Inicia o banco de dados
+   make compose-up
+   
+   # Inicia o lambda
+   make start-lambda
+   ```
+
+5. **Teste o lambda:**
+
+   ```bash
+   make trigger-lambda 
+   ```
+
+### Comandos Disponíveis
+
+```bash
+make help          # Mostra todos os comandos disponíveis
+make build         # Compila a aplicação
+make test          # Executa os testes
+make coverage      # Gera relatório de coverage
+make lint          # Executa linter
+make scan          # Executa scan de segurança
+make package       # Empacota para deploy
+make compose-up    # Inicia ambiente local
+make compose-down  # Para ambiente local
 ```
 
 ---
 
-## 🚀 Features
+## 📝 API e Documentação
 
-- Customer authentication via email and password
-- Secure JWT generation for authenticated sessions
-- Clean Architecture separation (domain, use cases, adapters, infrastructure)
-- Unit tests with testify and golden file responses
-- Error response standardization
-- Environment-based configuration
-- Terraform for AWS Lambda, API Gateway, IAM provisioning
+### Endpoints Disponíveis
 
----
-
-## 🔧 Technologies
-
-- **Go**
-- **AWS Lambda**
-- **Terraform**
-- **Docker**
-- **Docker Compose**
-- **MongoDB**
-- **Testify**
-- **JWT**
-- **Makefile**
-- **Structured logging**
+| Método   | Endpoint               | Descrição                           |
+|----------|------------------------|-------------------------------------|
+| `POST`   | `/auth`                | Autentica cliente com email e senha |
+| `GET`    | `/customers/{id}`      | Busca cliente por ID                |
+| `GET`    | `/customers/cpf/{cpf}` | Busca cliente por CPF               |
+| `GET`    | `/customers`           | Lista todos os clientes             |
+| `POST`   | `/customers`           | Cria novo cliente                   |
+| `PUT`    | `/customers/{id}`      | Atualiza cliente                    |
+| `DELETE` | `/customers/{id}`      | Remove cliente                      |
 
 ---
 
-## ⚙️ Getting Started
+## 🧪 Testes e Qualidade
 
-### Prerequisites
+### Execução de Testes
 
-- Go 1.24+
-- AWS CLI
-- Terraform
-- Docker
-- MongoDB (for local development)
+```bash
+# Executa todos os testes com detecção de race condition
+make test
 
-### Local Development
+# Gera relatório de coverage (abre no browser)
+make coverage
 
-1. Clone the repository:
+# Executa linter
+make lint
 
-   ```bash
-      git clone https://github.com/FIAP-SOAT-G20/tc4-customer-service.git
-      cd fiap-tech-challenge-3-lambda-auth-tf
-   ```
+# Executa scan de vulnerabilidades
+make scan
+```
 
-2. Create your environment variables:
+## 🏗️ Deploy e CI/CD
 
-   ```shell
-   cp env.example .env
-   # Edit .env as needed 
-   ```
+### Pipeline Automatizado
 
-3. Install dependencies:
+1. **Tests workflow** - Executa em todo push/PR para branch main
+2. **Build and Deploy workflow** - Dispara após testes bem-sucedidos
 
-   ```shell
-   make install
-   ```
+### Processo de Deploy
 
-4. Initialize lambda to receive requests:
+- **Testes**: Testes automatizados com upload de coverage para Codecov
+- **Linting**: Verificações de qualidade de código
+- **Security**: Scan de vulnerabilidades
+- **Build**: Criação de imagem Docker e push para ECR
+- **Deploy**: Deploy automatizado para AWS Lambda
 
-   ```shell
-   # Starts database
-   make compose-up
-   # Starts lambda
-   make start-lambda
-   ```
+### Pré-requisitos para Deploy
 
-5. Trigger lambda events
+- Credenciais AWS configuradas nos GitHub Secrets
+- Repositório ECR será criado automaticamente se não existir
 
-   ```shell
-   make trigger-lambda 
-   ```
+### Deploy Local com Terraform
 
-6. Run tests
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply
+```
 
-   ```shell
-   make test 
-   ```
+---
 
-7. View coverage:
+## 🔗 Projetos Relacionados
 
-   ```shell
-   make coverage
-   ```
+Este projeto faz parte de um sistema maior que inclui:
 
-## 📝 Authentication API
+- **[Infrastructure (Terraform)](https://github.com/FIAP-SOAT-G20/tc4-infrastructure-tf)** - Infrastructure as Code para
+  recursos AWS
+- **[Customer Service](https://github.com/FIAP-SOAT-G20/tc4-customer-service)** - Serviço de autenticação e
+  gerenciamento de clientes
+- **[Payment Service](https://github.com/FIAP-SOAT-G20/tc4-payment-service)** - Serviço de processamento de pagamentos
+- **[Kitchen Service](https://github.com/FIAP-SOAT-G20/tc4-kitchen-service)** - Serviço de operações da cozinha e
+  gerenciamento de pedidos
+- **[Kubernetes Deploy](https://github.com/FIAP-SOAT-G20/tc4-infrastructure-deploy)** - Configurações de deploy no
+  Kubernetes
 
-## 🏗️ Deployment
+---
 
-Deployment is automated via a **GitHub Actions workflow**. When changes are pushed to the main branch (or as configured
-in your workflow), the pipeline will build and deploy the Lambda function and related infrastructure using Terraform.
-
-**Prerequisite:**
-Before running `terraform plan` or `terraform apply` (either locally or via CI), ensure that all variables defined in
-`terraform/modules/lambda/ssm.tf` are created and initialized in your AWS environment. These variables are required for
-successful provisioning and configuration of the Lambda function and related resources.
-
-All the variables can be found on `env.example` file.
-
-## 📈 Testing
-
-Unit tests: make test
-Coverage: make coverage
-Golden files for output validation are found in internal/infrastructure/aws/lambda/golden/.
-
-## 🧩 Architecture
-
-The project follows Clean Architecture, dividing source code into distinct layers: Domain, UseCases, Adapters, and
-Infrastructure. See docs/architecture.drawio for the infrastructure diagram.
-
-## 👏 Contributing
-
-Fork the repository and create your branch from master branch.
-Run tests before PR (make test)
-Ensure code style with make lint
-Follow Conventional Commits for commit messages
-
-## 🙏 Support
-
-For issues, open a GitHub issue in this repository.
-
-## 📚 Docs
+## 📚 Documentação de Referência
 
 - [Best practices writing lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html)
 - [Code best practices for Go Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html#go-best-practices)
@@ -190,6 +222,6 @@ For issues, open a GitHub issue in this repository.
 - [MongoDB Go Driver Documentation](https://www.mongodb.com/docs/drivers/go/current/)
 - [MongoDB Best Practices](https://www.mongodb.com/developer/products/mongodb/mongodb-schema-design-best-practices/)
 
-## 📄 License
+## 📄 Licença
 
 MIT License
