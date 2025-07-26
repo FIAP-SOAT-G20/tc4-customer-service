@@ -11,12 +11,11 @@ exclude:
     - internal/core/domain/value_object/*
     - cmd/worker/consumer/main.go
     - health_check_handler.go
-    - jwt_service.go
+    - main.go
     - ^.*_mock\.go$
     - ^.*_request\.go$
     - ^.*_response\.go$
     - ^.*_gateway\.go$
-    - ^.*_datasource\.go$
     - ^.*_presenter\.go$
     - ^.*middleware.*
     - ^.*config.*
@@ -29,4 +28,5 @@ exclude:
     - ^.*_entity\.go$
     - ^.*errors\.go$
     - ^.*_dto\.go$
-    - tests/*
+    - ^.*_model\.go$
+    - test/*
