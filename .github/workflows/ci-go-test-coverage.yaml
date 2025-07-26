@@ -77,48 +77,39 @@ jobs:
           fi
           
           # Create enhanced coverage summary
-          {
-            echo "## 📊 Test Coverage Report"
-            echo ""
-            echo "**Status:** $COVERAGE_STATUS"
-            echo "**Result:** $COVERAGE_RESULT"
-            echo ""
-            echo "### 🎯 Coverage Details:"
-            echo '```'
-            echo "$COVERAGE_REPORT"
-            echo '```'
-            echo ""
-            echo "### 📋 Coverage Requirements:"
-            echo "- **Minimum Threshold:** 80%"
-            echo "- **Coverage Profile:** ./cover.out"
-            echo "- **Coverage Mode:** atomic"
-            echo ""
-            echo "### 🔧 Test Configuration:"
-            echo "- **Go Version:** ${{ matrix.go-version }}"
-            echo "- **Race Detection:** ✅ enabled"
-            echo "- **Timeout:** 1 minute"
-            echo "- **Test Packages:** All packages (./...)"
-            echo ""
-            echo "### Excluded from Coverage:"
-            echo "- Mock files (\`*_mock.go\`)"
-            echo "- Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)"
-            echo "- Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)"
-            echo "- Documentation and configuration files"
-            echo "- Value objects and domain entities"
-            echo ""
-            echo "---"
-            echo "_Automated test coverage ensures code quality and identifies untested business logic._"
-          } > coverage_summary.md
+          echo "## 📊 Test Coverage Report" > coverage_summary.md
+          echo "" >> coverage_summary.md
+          echo "**Status:** $COVERAGE_STATUS" >> coverage_summary.md
+          echo "**Result:** $COVERAGE_RESULT" >> coverage_summary.md
+          echo "" >> coverage_summary.md
+          echo "### 🎯 Coverage Details:" >> coverage_summary.md
+          echo '```' >> coverage_summary.md
+          echo "$COVERAGE_REPORT" >> coverage_summary.md
+          echo '```' >> coverage_summary.md
+          echo "" >> coverage_summary.md
+          echo "### 📋 Coverage Requirements:" >> coverage_summary.md
+          echo "- **Minimum Threshold:** 80%" >> coverage_summary.md
+          echo "- **Coverage Profile:** ./cover.out" >> coverage_summary.md
+          echo "- **Coverage Mode:** atomic" >> coverage_summary.md
+          echo "" >> coverage_summary.md
+          echo "### 🔧 Test Configuration:" >> coverage_summary.md
+          echo "- **Go Version:** ${{ matrix.go-version }}" >> coverage_summary.md
+          echo "- **Race Detection:** ✅ enabled" >> coverage_summary.md
+          echo "- **Timeout:** 1 minute" >> coverage_summary.md
+          echo "- **Test Packages:** All packages (./...)" >> coverage_summary.md
+          echo "" >> coverage_summary.md
+          echo "### Excluded from Coverage:" >> coverage_summary.md
+          echo "- Mock files (\`*_mock.go\`)" >> coverage_summary.md
+          echo "- Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)" >> coverage_summary.md
+          echo "- Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)" >> coverage_summary.md
+          echo "- Documentation and configuration files" >> coverage_summary.md
+          echo "- Value objects and domain entities" >> coverage_summary.md
+          echo "" >> coverage_summary.md
+          echo "---" >> coverage_summary.md
+          echo "_Automated test coverage ensures code quality and identifies untested business logic._" >> coverage_summary.md
           
           # Also add to step summary
           cat coverage_summary.md >> $GITHUB_STEP_SUMMARY
-          
-          # Set output for PR comment
-          {
-            echo "SUMMARY_CONTENT<<COVERAGE_EOF"
-            cat coverage_summary.md
-            echo "COVERAGE_EOF"
-          } >> $GITHUB_OUTPUT
 
       - name: Comment coverage report on PR
         if: always() && github.event_name == 'pull_request'
@@ -126,7 +117,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-tag: coverage-report
-          message: ${{ steps.coverage-summary.outputs.SUMMARY_CONTENT }}
+          filePath: coverage_summary.md
 
       - name: "finally check coverage"
         if: steps.coverage.outcome == 'failure'
