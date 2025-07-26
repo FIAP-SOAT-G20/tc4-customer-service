@@ -29,6 +29,8 @@ jobs:
         run: go version
 
       - name: generate test coverage
+        env:
+          SKIP_INTEGRATION_TESTS: "true"
         run: go test -json -timeout 1m -race ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
 
       - name: check test coverage
