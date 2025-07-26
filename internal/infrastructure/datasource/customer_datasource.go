@@ -104,7 +104,11 @@ func (ds *customerDataSource) FindAll(ctx context.Context, filters map[string]in
 	if err != nil {
 		return nil, 0, err
 	}
-	defer cursor.Close(ctx)
+	defer func() {
+		if closeErr := cursor.Close(ctx); closeErr != nil {
+			ds.db.LogOperation(ctx, "FindAll cursor close error", customersCollection, time.Since(startTime), closeErr)
+		}
+	}()
 
 	var customerModels []model.CustomerModel
 	if err = cursor.All(ctx, &customerModels); err != nil {

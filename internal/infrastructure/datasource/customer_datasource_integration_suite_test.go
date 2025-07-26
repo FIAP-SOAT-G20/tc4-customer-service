@@ -48,7 +48,9 @@ func (suite *CustomerDataSourceIntegrationTestSuite) SetupSuite() {
 
 func (suite *CustomerDataSourceIntegrationTestSuite) TearDownSuite() {
 	if suite.db != nil {
-		suite.db.Close(suite.ctx)
+		if err := suite.db.Close(suite.ctx); err != nil {
+			suite.T().Logf("Error closing database connection: %v", err)
+		}
 	}
 }
 
