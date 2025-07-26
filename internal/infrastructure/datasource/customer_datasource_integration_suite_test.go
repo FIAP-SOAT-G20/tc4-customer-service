@@ -69,6 +69,9 @@ func TestCustomerDataSourceIntegrationTestSuite(t *testing.T) {
 }
 
 func getTestMongoURI() string {
+	if uri := os.Getenv("MONGO_URI"); uri != "" {
+		return uri
+	}
 	if uri := os.Getenv("TEST_MONGODB_URI"); uri != "" {
 		return uri
 	}
