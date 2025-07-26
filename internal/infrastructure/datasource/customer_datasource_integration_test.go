@@ -44,7 +44,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestCreate() {
 	for _, tt := range tests {
 		suite.T().Run(tt.name, func(t *testing.T) {
 			// Clear collection before each test
-			suite.collection.Drop(suite.ctx)
+			_ = suite.collection.Drop(suite.ctx)
 
 			err := suite.dataSource.Create(suite.ctx, tt.customer)
 

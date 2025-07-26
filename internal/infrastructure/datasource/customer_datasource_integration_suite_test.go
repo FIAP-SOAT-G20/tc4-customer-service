@@ -42,7 +42,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) SetupSuite() {
 	suite.db, err = database.NewMongoConnection(cfg, l)
 	require.NoError(suite.T(), err, "Failed to connect to test MongoDB")
 
-	suite.dataSource = datasource.NewCustomerDataSource(suite.db).(port.CustomerDataSource)
+	suite.dataSource = datasource.NewCustomerDataSource(suite.db)
 	suite.collection = suite.db.Collection("customers")
 }
 
@@ -53,11 +53,11 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TearDownSuite() {
 }
 
 func (suite *CustomerDataSourceIntegrationTestSuite) SetupTest() {
-	suite.collection.Drop(suite.ctx)
+	_ = suite.collection.Drop(suite.ctx)
 }
 
 func (suite *CustomerDataSourceIntegrationTestSuite) TearDownTest() {
-	suite.collection.Drop(suite.ctx)
+	_ = suite.collection.Drop(suite.ctx)
 }
 
 func TestCustomerDataSourceIntegrationTestSuite(t *testing.T) {
