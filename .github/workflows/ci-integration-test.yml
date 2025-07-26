@@ -2,7 +2,7 @@ name: ci/integration-tests
 
 on:
   workflow_run:
-    workflows: [ "ci/unit-tests", "ci/linter", "ci/security-checks" ]
+    workflows: [ "ci/unit-tests" ]
     types: [ completed ]
     branches: [ main ]
   pull_request:
