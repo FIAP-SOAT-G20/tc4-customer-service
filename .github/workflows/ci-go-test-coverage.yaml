@@ -88,7 +88,7 @@ jobs:
           $COVERAGE_REPORT
           \`\`\`
           
-          ### � Coverage Requirements:
+          ### 📋 Coverage Requirements:
           - **Minimum Threshold:** 80%
           - **Coverage Profile:** ./cover.out
           - **Coverage Mode:** atomic
@@ -99,7 +99,7 @@ jobs:
           - **Timeout:** 1 minute
           - **Test Packages:** All packages (./...)
           
-          ### � Excluded from Coverage:
+          ### 🚫 Excluded from Coverage:
           - Mock files (\`*_mock.go\`)
           - Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)
           - Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)
