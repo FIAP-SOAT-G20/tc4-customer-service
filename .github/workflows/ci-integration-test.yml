@@ -1,15 +1,18 @@
-name: Tests
+name: ci/integration-tests
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: [ "ci/unit-tests", "ci/linter", "ci/security-checks" ]
+    types: [ completed ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
-  test:
-    name: Run Tests
+  integration-test:
+    name: integration tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'pull_request' }}
     
     services:
       mongodb:
@@ -27,14 +30,12 @@ jobs:
           --health-retries 5
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: 🚀 Setup Go
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.24.2'
-          cache: true
+          go-version: '1.24'
 
       - name: Install MongoDB Shell
         run: |
@@ -49,26 +50,11 @@ jobs:
           timeout 60s bash -c 'until mongosh --quiet --eval "db.runCommand({ ping: 1 })" mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin; do sleep 2; done'
           echo "MongoDB is ready!"
 
-      - name: Run tests
+      - name: 🛠️ Create .env
+        run: cp .env.example .env
+
+      - name: ✅ Run integration tests
         env:
           ENVIRONMENT: test
           MONGO_URI: mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin
-        run: go test -v -race -coverprofile=coverage.out ./...
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.out
-          fail_ci_if_error: false
-
-
-      - name: Run linter
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          args: --timeout=10m
-
-      - name: Check go mod tidy
-        run: |
-          go mod tidy
-          git diff --exit-code go.mod go.sum
+        run: make integration-test
