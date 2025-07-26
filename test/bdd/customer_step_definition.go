@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/cucumber/godog"
@@ -90,7 +91,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 
 func theCustomerServiceIsRunning() error {
 	// Set a test environment
-	mongoURI := os.Getenv("MONGO_URI")
+	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
 		mongoURI = "mongodb://admin:admin@localhost:27017/fastfood_test?authSource=admin"
 	}
@@ -99,9 +100,9 @@ func theCustomerServiceIsRunning() error {
 		Environment:      "test",
 		MongoURI:         mongoURI,
 		MongoDatabase:    "fastfood_test",
-		MongoTimeout:     10000000000, // 10s in nanoseconds
-		MongoMaxPoolSize: 100,
-		MongoMinPoolSize: 5,
+		MongoTimeout:     30 * time.Second,
+		MongoMaxPoolSize: 10,
+		MongoMinPoolSize: 1,
 		JWTSecret:        "test-secret-key",
 		JWTIssuer:        "test-issuer",
 		JWTAudience:      "test-audience",

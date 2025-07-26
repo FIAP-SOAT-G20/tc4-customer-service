@@ -30,7 +30,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) SetupSuite() {
 
 	cfg := &config.Config{
 		MongoURI:         getTestMongoURI(),
-		MongoDatabase:    "customer_service_integration_test",
+		MongoDatabase:    "fastfood_test",
 		MongoTimeout:     30 * time.Second,
 		MongoMaxPoolSize: 10,
 		MongoMinPoolSize: 1,
@@ -71,11 +71,11 @@ func TestCustomerDataSourceIntegrationTestSuite(t *testing.T) {
 }
 
 func getTestMongoURI() string {
-	if uri := os.Getenv("MONGO_URI"); uri != "" {
+	if uri := os.Getenv("MONGODB_URI"); uri != "" {
 		return uri
 	}
 	if uri := os.Getenv("TEST_MONGODB_URI"); uri != "" {
 		return uri
 	}
-	return "mongodb://admin:admin@localhost:27017"
+	return "mongodb://admin:admin@localhost:27017/fastfood_test?authSource=admin"
 }
