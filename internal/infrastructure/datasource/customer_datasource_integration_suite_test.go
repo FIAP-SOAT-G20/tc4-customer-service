@@ -67,6 +67,11 @@ func TestCustomerDataSourceIntegrationTestSuite(t *testing.T) {
 		t.Skip("Skipping integration tests in short mode")
 	}
 
+	// Skip integration tests in coverage mode or when explicitly requested
+	if os.Getenv("COVERAGE_MODE") == "true" || os.Getenv("SKIP_INTEGRATION_TESTS") == "true" {
+		t.Skip("Skipping integration tests in coverage mode")
+	}
+
 	suite.Run(t, new(CustomerDataSourceIntegrationTestSuite))
 }
 
