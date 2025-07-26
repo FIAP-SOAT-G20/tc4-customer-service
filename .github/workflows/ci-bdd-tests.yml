@@ -2,7 +2,7 @@ name: ci/bdd-tests
 
 on:
   workflow_run:
-    workflows: [ "ci/unit-tests", "ci/linter", "ci/security-checks" ]
+    workflows: [ "ci/unit-tests", "ci/linter", "ci/security-checks", "ci/integration-tests" ]
     types: [ completed ]
     branches: [ "main" ]
   pull_request:
