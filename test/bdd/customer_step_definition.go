@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/cucumber/godog"
@@ -97,16 +96,13 @@ func theCustomerServiceIsRunning() error {
 	}
 
 	cfg := &config.Config{
-		Environment:      "test",
-		MongoURI:         mongoURI,
-		MongoDatabase:    "fastfood_test",
-		MongoTimeout:     30 * time.Second,
-		MongoMaxPoolSize: 10,
-		MongoMinPoolSize: 1,
-		JWTSecret:        "test-secret-key",
-		JWTIssuer:        "test-issuer",
-		JWTAudience:      "test-audience",
-		JWTExpiration:    86400000000000, // 24h in nanoseconds
+		Environment:   "test",
+		MongoURI:      mongoURI,
+		MongoDatabase: "fastfood_test",
+		JWTSecret:     "test-secret-key",
+		JWTIssuer:     "test-issuer",
+		JWTAudience:   "test-audience",
+		JWTExpiration: 86400000000000, // 24h in nanoseconds
 	}
 
 	testCtx.logger = logger.NewLogger(cfg)
