@@ -7,6 +7,10 @@ on:
       - completed
     branches: [ main ]
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   coverage-branch:
     name: Update Coverage Branch
@@ -72,14 +76,12 @@ jobs:
           # Create or switch to coverage branch
           git checkout --orphan coverage
           
-          # Clean working directory
+          # Clean working directory (keep coverage files)
           git rm -rf . 2>/dev/null || true
           
-          # Copy coverage files
-          cp coverage.out .
-          cp coverage.html .
-          cp coverage-badge.svg .
-          cp coverage-summary.md .
+          # Coverage files are already in the current directory
+          # Just ensure they exist
+          ls -la coverage.out coverage.html coverage-badge.svg coverage-summary.md
           
           # Add and commit coverage files
           git add .
