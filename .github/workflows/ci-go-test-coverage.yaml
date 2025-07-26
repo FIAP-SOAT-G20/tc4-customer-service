@@ -29,8 +29,6 @@ jobs:
         run: go version
 
       - name: generate test coverage
-        env:
-          COVERAGE_MODE: "true"
         run: go test -json -timeout 1m -race ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
 
       - name: check test coverage
@@ -57,73 +55,71 @@ jobs:
       - name: 📋 Generate coverage summary
         if: always()
         id: coverage-summary
-        shell: bash
         run: |
           # Determine coverage status based on coverage check step outcome
-          if [[ "${{ steps.coverage.outcome }}" == "success" ]]; then
+          if [ "${{ steps.coverage.outcome }}" = "success" ]; then
             COVERAGE_STATUS="✅ PASSED"
+            STATUS_ICON="✅"
             COVERAGE_RESULT="Coverage requirements met"
           else
             COVERAGE_STATUS="❌ FAILED"
+            STATUS_ICON="❌"
             COVERAGE_RESULT="Coverage requirements not met"
           fi
           
           # Extract coverage percentage from report if available
-          if [[ -n "${{ steps.coverage.outputs.report }}" ]]; then
-            COVERAGE_REPORT="${{ steps.coverage.outputs.report }}"
-          else
-            COVERAGE_REPORT="Coverage report not available"
-          fi
+          COVERAGE_REPORT="${{ fromJSON(steps.coverage.outputs.report) }}"
           
-          # Create coverage summary content
-          SUMMARY_CONTENT="## 📊 Test Coverage Report
-
+          # Create enhanced coverage summary
+          cat > coverage_summary.md << EOF
+          ## 📊 Test Coverage Report
+          
           **Status:** $COVERAGE_STATUS  
           **Result:** $COVERAGE_RESULT
-
+          
           ### 🎯 Coverage Details:
           \`\`\`
           $COVERAGE_REPORT
           \`\`\`
-
-          ### 📋 Coverage Requirements:
+          
+          ### � Coverage Requirements:
           - **Minimum Threshold:** 80%
           - **Coverage Profile:** ./cover.out
           - **Coverage Mode:** atomic
-
+          
           ### 🔧 Test Configuration:
           - **Go Version:** ${{ matrix.go-version }}
           - **Race Detection:** ✅ enabled
           - **Timeout:** 1 minute
           - **Test Packages:** All packages (./...)
-
-          ### Excluded from Coverage:
+          
+          ### � Excluded from Coverage:
           - Mock files (\`*_mock.go\`)
           - Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)
           - Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)
           - Documentation and configuration files
           - Value objects and domain entities
-
+          
           ---
-          _Automated test coverage ensures code quality and identifies untested business logic._"
+          _Automated test coverage ensures code quality and identifies untested business logic._
+          EOF
           
-          # Add to step summary
-          echo "$SUMMARY_CONTENT" >> $GITHUB_STEP_SUMMARY
+          # Also add to step summary
+          cat coverage_summary.md >> $GITHUB_STEP_SUMMARY
           
-          # Set output for PR comment using proper multiline syntax
-          {
-            echo "SUMMARY_CONTENT<<EOF_COVERAGE_SUMMARY"
-            echo "$SUMMARY_CONTENT"
-            echo "EOF_COVERAGE_SUMMARY"
-          } >> $GITHUB_OUTPUT
+          # Set output for PR comment
+          echo "SUMMARY_CONTENT<<EOF" >> $GITHUB_OUTPUT
+          cat coverage_summary.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Comment coverage report on PR
+      - name: 💬 Comment coverage report on PR
         if: always() && github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-tag: coverage-report
           message: ${{ steps.coverage-summary.outputs.SUMMARY_CONTENT }}
+
 
       - name: "finally check coverage"
         if: steps.coverage.outcome == 'failure'
