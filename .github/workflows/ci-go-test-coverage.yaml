@@ -99,7 +99,7 @@ jobs:
           - **Timeout:** 1 minute
           - **Test Packages:** All packages (./...)
           
-          ### 🚫 Excluded from Coverage:
+          ### Excluded from Coverage:
           - Mock files (\`*_mock.go\`)
           - Request/Response DTOs (\`*_request.go\`, \`*_response.go\`)
           - Infrastructure adapters (\`*_gateway.go\`, \`*_datasource.go\`, \`*_presenter.go\`)
@@ -118,7 +118,7 @@ jobs:
           cat coverage_summary.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: 💬 Comment coverage report on PR
+      - name: Comment coverage report on PR
         if: always() && github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v3
         with:
