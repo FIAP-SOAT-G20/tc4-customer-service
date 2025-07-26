@@ -1,0 +1,93 @@
+name: Coverage Branch
+
+on:
+  workflow_run:
+    workflows: [ "Tests" ]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  coverage-branch:
+    name: Update Coverage Branch
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.2'
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-reports
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Generate coverage reports
+        run: |
+          # Generate HTML coverage report
+          go tool cover -html=coverage.out -o coverage.html
+          
+          # Calculate coverage percentage
+          COVERAGE_PERCENT=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "Coverage: ${COVERAGE_PERCENT}%"
+          
+          # Create coverage badge
+          if (( $(echo "$COVERAGE_PERCENT >= 80" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$COVERAGE_PERCENT >= 60" | bc -l) )); then
+            COLOR="yellow"
+          else
+            COLOR="red"
+          fi
+          
+          curl -o coverage-badge.svg "https://img.shields.io/badge/coverage-${COVERAGE_PERCENT}%25-${COLOR}"
+          
+          # Create coverage summary
+          echo "# Coverage Report" > coverage-summary.md
+          echo "" >> coverage-summary.md
+          echo "![Coverage](./coverage-badge.svg)" >> coverage-summary.md
+          echo "" >> coverage-summary.md
+          echo "**Total Coverage:** ${COVERAGE_PERCENT}%" >> coverage-summary.md
+          echo "" >> coverage-summary.md
+          echo "Generated on: $(date -u)" >> coverage-summary.md
+          echo "" >> coverage-summary.md
+          echo "## Detailed Report" >> coverage-summary.md
+          echo "" >> coverage-summary.md
+          echo "View the [detailed HTML coverage report](./coverage.html)" >> coverage-summary.md
+
+      - name: Create/Update coverage branch
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if coverage branch exists
+          if git ls-remote --heads origin coverage; then
+            git fetch origin coverage
+            git checkout coverage
+            git rm -rf . || true
+          else
+            git checkout --orphan coverage
+            git rm -rf . || true
+          fi
+          
+          # Copy coverage files
+          cp coverage.out .
+          cp coverage.html .
+          cp coverage-badge.svg .
+          cp coverage-summary.md .
+          
+          # Add and commit coverage files
+          git add .
+          git commit -m "Update coverage report - $(date -u)" || echo "No changes to commit"
+          
+          # Push to coverage branch
+          git push origin coverage
