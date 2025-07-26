@@ -4,9 +4,9 @@ on:
   workflow_run:
     workflows: [ "ci/unit-tests", "ci/linter", "ci/security-checks" ]
     types: [ completed ]
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   integration-test:
