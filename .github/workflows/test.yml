@@ -11,18 +11,13 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     
-    env:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
-      MONGO_INITDB_DATABASE: fastfood_test
-    
     services:
       mongodb:
         image: mongo:8.0
         env:
-          MONGO_INITDB_ROOT_USERNAME: ${{ env.MONGO_INITDB_ROOT_USERNAME }}
-          MONGO_INITDB_ROOT_PASSWORD: ${{ env.MONGO_INITDB_ROOT_PASSWORD }}
-          MONGO_INITDB_DATABASE: ${{ env.MONGO_INITDB_DATABASE }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+          MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
         ports:
           - 27017:27017
         options: >-
@@ -51,13 +46,13 @@ jobs:
       - name: Wait for MongoDB to be ready
         run: |
           echo "Waiting for MongoDB to be ready..."
-          timeout 60s bash -c 'until mongosh --quiet --eval "db.runCommand({ ping: 1 })" mongodb://${{ env.MONGO_INITDB_ROOT_USERNAME }}:${{ env.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ env.MONGO_INITDB_DATABASE }}?authSource=admin; do sleep 2; done'
+          timeout 60s bash -c 'until mongosh --quiet --eval "db.runCommand({ ping: 1 })" mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin; do sleep 2; done'
           echo "MongoDB is ready!"
 
       - name: Run tests
         env:
           ENVIRONMENT: test
-          MONGO_URI: mongodb://${{ env.MONGO_INITDB_ROOT_USERNAME }}:${{ env.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ env.MONGO_INITDB_DATABASE }}?authSource=admin
+          MONGO_URI: mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Upload coverage reports
@@ -65,6 +60,12 @@ jobs:
         with:
           file: ./coverage.out
           fail_ci_if_error: false
+
+      - name: Save coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage.out
 
       - name: Run linter
         uses: golangci/golangci-lint-action@v6
