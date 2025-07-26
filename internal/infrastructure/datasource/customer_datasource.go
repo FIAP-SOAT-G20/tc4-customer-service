@@ -11,6 +11,7 @@ import (
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/infrastructure/datasource/model"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -121,7 +122,14 @@ func (ds *customerDataSource) Create(ctx context.Context, customer *entity.Custo
 	startTime := time.Now()
 
 	customerModel := model.FromEntity(customer)
-	_, err := ds.collection.InsertOne(ctx, customerModel)
+	result, err := ds.collection.InsertOne(ctx, customerModel)
+
+	if err == nil {
+		// Update the entity with the generated MongoDB ObjectID
+		if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
+			customer.ID = oid.Hex()
+		}
+	}
 
 	duration := time.Since(startTime)
 	ds.db.LogOperation(ctx, "Create", customersCollection, duration, err)
