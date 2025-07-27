@@ -1,44 +1,31 @@
 services:
-  db:
-    image: mongo:8.0-noble
-    container_name: db.10soat-g22.dev
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
-      - MONGO_INITDB_DATABASE=fastfood_10soat_g22_tc4
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local.10soat-g22.dev
+    command: [ "-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory" ]
     ports:
-      - "27017:27017"
-    volumes:
-      - db_data:/data/db
+      - "8000:8000"
     networks:
       - fastfood_10soat_g22_tc4_network
     healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/ || exit 1" ]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
 
-  dbadmin:
-    image: mongo-express:1.0.2-20
-    container_name: dbadmin.10soat-g22.dev
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    container_name: dynamodb-admin.10soat-g22.dev
     environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=admin
-      - ME_CONFIG_MONGODB_URL=mongodb://admin:admin@db:27017/
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+      - DYNAMO_ENDPOINT=http://dynamodb-local:8000
     ports:
-      - "8081:8081"
+      - "8001:8001"
     depends_on:
-      - db
+      - dynamodb-local
     networks:
       - fastfood_10soat_g22_tc4_network
     restart: unless-stopped
-
-volumes:
-  db_data:
-    driver: local
 
 networks:
   fastfood_10soat_g22_tc4_network:

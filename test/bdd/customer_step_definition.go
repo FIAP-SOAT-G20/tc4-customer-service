@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cucumber/godog"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/adapter/controller"
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/adapter/gateway"
@@ -35,8 +38,7 @@ type TestContext struct {
 	customerController    port.CustomerController
 	jsonPresenter         port.Presenter
 	jwtPresenter          port.Presenter
-	mongoClient           *mongo.Client
-	mongoDatabase         *mongo.Database
+	dynamoDb              *database.DynamoDatabase
 	logger                *logger.Logger
 	lastCreatedCustomerID string
 }
@@ -52,15 +54,15 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	})
 
 	ctx.After(func(ctx context.Context, sc *godog.Scenario, err error) (context.Context, error) {
-		if testCtx.mongoClient != nil {
-			_ = testCtx.mongoClient.Disconnect(ctx)
+		// Clear table after each scenario to ensure clean state for next test
+		if testCtx != nil && testCtx.dynamoDb != nil {
+			clearTestTable()
 		}
 		return ctx, nil
 	})
 
 	// Background steps
 	ctx.Step(`^the customer service is running$`, theCustomerServiceIsRunning)
-	ctx.Step(`^the database is clean$`, theDatabaseIsClean)
 
 	// Authentication steps
 	ctx.Step(`^I send an authentication request with CPF "([^"]*)"$`, iSendAnAuthenticationRequestWithCPF)
@@ -89,59 +91,53 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 }
 
 func theCustomerServiceIsRunning() error {
-	// Set a test environment
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		mongoURI = "mongodb://admin:admin@localhost:27017/fastfood_test?authSource=admin"
+	// Set a test environment for DynamoDB
+	dynamoTableName := os.Getenv("DYNAMODB_TABLE_NAME")
+	if dynamoTableName == "" {
+		dynamoTableName = "tc4-customer-service-test-customers"
+	}
+
+	dynamoRegion := os.Getenv("DYNAMODB_REGION")
+	if dynamoRegion == "" {
+		dynamoRegion = "us-east-1"
 	}
 
 	cfg := &config.Config{
-		Environment:   "test",
-		MongoURI:      mongoURI,
-		MongoDatabase: "fastfood_test",
-		JWTSecret:     "test-secret-key",
-		JWTIssuer:     "test-issuer",
-		JWTAudience:   "test-audience",
-		JWTExpiration: 86400000000000, // 24h in nanoseconds
+		Environment:     "test",
+		DynamoTableName: dynamoTableName,
+		DynamoRegion:    dynamoRegion,
+		JWTSecret:       "test-secret-key",
+		JWTIssuer:       "test-issuer",
+		JWTAudience:     "test-audience",
+		JWTExpiration:   86400000000000, // 24h in nanoseconds
 	}
 
 	testCtx.logger = logger.NewLogger(cfg)
 
 	// Setup test database
-	mongoDb, err := database.NewMongoConnection(cfg, testCtx.logger)
+	testEndpoint := os.Getenv("TEST_DYNAMODB_ENDPOINT")
+	if testEndpoint == "" {
+		testEndpoint = "http://localhost:8000" // default for local testing
+	}
+	dynamoDb, err := database.NewDynamoTestConnection(cfg, testCtx.logger, testEndpoint)
 	if err != nil {
-		fmt.Printf("Skipping BDD tests: MongoDB not available: %v\n", err)
+		fmt.Printf("Skipping BDD tests: DynamoDB not available: %v\n", err)
 		os.Exit(0)
 	}
 
-	testCtx.mongoClient = mongoDb.Client
-	testCtx.mongoDatabase = mongoDb.Database
+	testCtx.dynamoDb = dynamoDb
+
+	// Create test table if it doesn't exist
+	createTestTableIfNotExists(dynamoDb)
 
 	// Setup dependencies
 	jwtService := service.NewJWTService(cfg)
-	testCtx.customerDataSource = datasource.NewCustomerDataSource(mongoDb)
+	testCtx.customerDataSource = datasource.NewCustomerDynamoDataSource(dynamoDb)
 	testCtx.customerGateway = gateway.NewCustomerGateway(testCtx.customerDataSource)
 	testCtx.customerUseCase = usecase.NewCustomerUseCase(testCtx.customerGateway)
 	testCtx.customerController = controller.NewCustomerController(testCtx.customerUseCase)
 	testCtx.jsonPresenter = presenter.NewCustomerJsonPresenter()
 	testCtx.jwtPresenter = presenter.NewCustomerJwtTokenPresenter(jwtService)
-
-	return nil
-}
-
-func theDatabaseIsClean() error {
-	if testCtx.mongoDatabase == nil {
-		return fmt.Errorf("database not initialized")
-	}
-
-	// Clean all collections
-	collections := []string{"customers"}
-	for _, collection := range collections {
-		err := testCtx.mongoDatabase.Collection(collection).Drop(context.Background())
-		if err != nil {
-			return fmt.Errorf("failed to clean collection %s: %w", collection, err)
-		}
-	}
 
 	return nil
 }
@@ -630,4 +626,109 @@ func theResponseShouldContainTheUpdatedCustomerDetails() error {
 	}
 
 	return nil
+}
+
+// createTestTableIfNotExists creates the DynamoDB table for tests if it doesn't exist
+func createTestTableIfNotExists(db *database.DynamoDatabase) {
+	ctx := context.Background()
+
+	// Check if table exists
+	_, err := db.Client.DescribeTable(ctx, &dynamodb.DescribeTableInput{
+		TableName: aws.String(db.TableName),
+	})
+
+	if err != nil {
+		// Table doesn't exist, create it
+		_, err = db.Client.CreateTable(ctx, &dynamodb.CreateTableInput{
+			TableName: aws.String(db.TableName),
+			KeySchema: []types.KeySchemaElement{
+				{
+					AttributeName: aws.String("id"),
+					KeyType:       types.KeyTypeHash,
+				},
+			},
+			AttributeDefinitions: []types.AttributeDefinition{
+				{
+					AttributeName: aws.String("id"),
+					AttributeType: types.ScalarAttributeTypeS,
+				},
+				{
+					AttributeName: aws.String("cpf"),
+					AttributeType: types.ScalarAttributeTypeS,
+				},
+			},
+			GlobalSecondaryIndexes: []types.GlobalSecondaryIndex{
+				{
+					IndexName: aws.String("cpf-index"),
+					KeySchema: []types.KeySchemaElement{
+						{
+							AttributeName: aws.String("cpf"),
+							KeyType:       types.KeyTypeHash,
+						},
+					},
+					Projection: &types.Projection{
+						ProjectionType: types.ProjectionTypeAll,
+					},
+					ProvisionedThroughput: &types.ProvisionedThroughput{
+						ReadCapacityUnits:  aws.Int64(5),
+						WriteCapacityUnits: aws.Int64(5),
+					},
+				},
+			},
+			ProvisionedThroughput: &types.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(5),
+				WriteCapacityUnits: aws.Int64(5),
+			},
+		})
+
+		if err != nil {
+			fmt.Printf("Warning: Could not create test table: %v\n", err)
+		} else {
+			// Wait for the table to be active
+			waiter := dynamodb.NewTableExistsWaiter(db.Client)
+			err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
+				TableName: aws.String(db.TableName),
+			}, 30*time.Second, func(o *dynamodb.TableExistsWaiterOptions) {
+				o.MaxDelay = 30 * time.Second
+				o.MinDelay = 2 * time.Second
+			})
+			if err != nil {
+				fmt.Printf("Warning: Table creation wait failed: %v\n", err)
+			}
+		}
+	}
+}
+
+// clearTestTable removes all items from the test table
+func clearTestTable() {
+	if testCtx.dynamoDb == nil {
+		return
+	}
+
+	ctx := context.Background()
+
+	// Scan and delete all items
+	scanInput := &dynamodb.ScanInput{
+		TableName: aws.String(testCtx.dynamoDb.TableName),
+	}
+
+	result, err := testCtx.dynamoDb.Client.Scan(ctx, scanInput)
+	if err != nil {
+		fmt.Printf("Warning: Could not scan table for cleanup: %v\n", err)
+		return
+	}
+
+	for _, item := range result.Items {
+		if id, exists := item["id"]; exists {
+			_, err := testCtx.dynamoDb.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
+				TableName: aws.String(testCtx.dynamoDb.TableName),
+				Key: map[string]types.AttributeValue{
+					"id": id,
+				},
+			})
+			if err != nil {
+				fmt.Printf("Warning: Could not delete item during cleanup: %v\n", err)
+			}
+		}
+	}
 }

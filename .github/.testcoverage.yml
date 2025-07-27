@@ -17,7 +17,7 @@ exclude:
     - ^.*_request\.go$
     - ^.*_response\.go$
     - ^.*_gateway\.go$
-    - ^.*_datasource\.go$
+    - ^.*_datasource.*\.go$
     - ^.*_presenter\.go$
     - ^.*middleware.*
     - ^.*config.*

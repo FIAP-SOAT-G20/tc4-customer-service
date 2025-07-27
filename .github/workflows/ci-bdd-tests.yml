@@ -19,21 +19,6 @@ jobs:
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
       github.event_name == 'pull_request'
 
-    services:
-      mongodb:
-        image: mongo:8.0
-        env:
-          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
-          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
-          MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: 📦 Checkout code
         uses: actions/checkout@v4
@@ -44,21 +29,16 @@ jobs:
           go-version: '1.24'
           cache: true
 
+      - name: 🗄️ Setup DynamoDB Local
+        uses: rrainn/dynamodb-action@v2.0.1
+        with:
+          port: 8000
+          cors: '*'
+          sharedDb: true
+          version: '2.5.2'
+
       - name: ️ Create .env file
         run: cp .env.example .env
-
-      - name: Install MongoDB Shell
-        run: |
-          wget -qO- https://www.mongodb.org/static/pgp/server-8.0.asc | sudo apt-key add -
-          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
-          sudo apt-get update
-          sudo apt-get install -y mongodb-mongosh
-
-      - name: Wait for MongoDB to be ready
-        run: |
-          echo "Waiting for MongoDB to be ready..."
-          timeout 60s bash -c 'until mongosh --quiet --eval "db.runCommand({ ping: 1 })" mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin; do sleep 2; done'
-          echo "MongoDB is ready!"
 
       - name: 📦 Download Go modules
         run: go mod download
@@ -68,7 +48,9 @@ jobs:
         run: make bdd-test
         continue-on-error: true
         env:
-          MONGODB_URI: mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin
+          DYNAMODB_TABLE_NAME: tc4-customer-service-test-customers
+          DYNAMODB_REGION: us-east-1
+          TEST_DYNAMODB_ENDPOINT: http://localhost:8000
           # Testcontainers configuration for CI
           TESTCONTAINERS_RYUK_DISABLED: true
           TESTCONTAINERS_CHECKS_DISABLE: true
@@ -115,7 +97,7 @@ jobs:
           
           ### 🔧 Test Framework:
           - **BDD Framework:** Gherkin + Godog
-          - **Database:** MongoDB (via Testcontainers)
+          - **Database:** DynamoDB Local
           - **Test Environment:** Mock HTTP handlers with Gin
           
           ---

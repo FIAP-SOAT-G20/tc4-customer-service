@@ -20,6 +20,11 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
+	// Skip BDD tests in coverage mode or when explicitly requested
+	if os.Getenv("COVERAGE_MODE") == "true" || os.Getenv("SKIP_INTEGRATION_TESTS") == "true" {
+		os.Exit(0)
+	}
+
 	flag.Parse()
 	opts.Paths = flag.Args()
 
@@ -36,6 +41,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestCustomerService(t *testing.T) {
+	// Skip BDD tests in coverage mode or when explicitly requested
+	if os.Getenv("COVERAGE_MODE") == "true" || os.Getenv("SKIP_INTEGRATION_TESTS") == "true" {
+		t.Skip("Skipping BDD tests in coverage mode")
+	}
+
 	suite := godog.TestSuite{
 		ScenarioInitializer: func(ctx *godog.ScenarioContext) {
 			InitializeScenario(ctx)
@@ -53,6 +63,11 @@ func TestCustomerService(t *testing.T) {
 }
 
 func TestBDDFeatures(t *testing.T) {
+	// Skip BDD tests in coverage mode or when explicitly requested
+	if os.Getenv("COVERAGE_MODE") == "true" || os.Getenv("SKIP_INTEGRATION_TESTS") == "true" {
+		t.Skip("Skipping BDD tests in coverage mode")
+	}
+
 	suite := godog.TestSuite{
 		ScenarioInitializer: InitializeScenario,
 		Options: &godog.Options{

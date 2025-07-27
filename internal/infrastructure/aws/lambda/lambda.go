@@ -53,12 +53,12 @@ func init() {
 		return
 	}
 
-	db, err := database.NewMongoConnection(cfg, l)
+	db, err := database.NewDynamoConnection(cfg, l)
 	if err != nil {
 		panic(err)
 	}
 	jwtService := service.NewJWTService(cfg)
-	customerDataSource = datasource.NewCustomerDataSource(db)
+	customerDataSource = datasource.NewCustomerDynamoDataSource(db)
 	customerGateway = gateway.NewCustomerGateway(customerDataSource)
 	customerUseCase = usecase.NewCustomerUseCase(customerGateway)
 	customerController = controller.NewCustomerController(customerUseCase)
