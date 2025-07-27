@@ -125,18 +125,24 @@ func (ds *customerDynamoDataSource) FindAll(ctx context.Context, filters map[str
 	if len(filters) > 0 {
 		filterExpression := ""
 		expressionAttributeValues := make(map[string]types.AttributeValue)
+		expressionAttributeNames := make(map[string]string)
 
 		for key, value := range filters {
 			if filterExpression != "" {
 				filterExpression += " AND "
 			}
-			filterExpression += fmt.Sprintf("%s = :%s", key, key)
+
+			// Handle reserved keywords by using expression attribute names
+			attributeName := fmt.Sprintf("#%s", key)
+			expressionAttributeNames[attributeName] = key
+			filterExpression += fmt.Sprintf("%s = :%s", attributeName, key)
 			expressionAttributeValues[":"+key] = &types.AttributeValueMemberS{Value: fmt.Sprint(value)}
 		}
 
 		if filterExpression != "" {
 			input.FilterExpression = aws.String(filterExpression)
 			input.ExpressionAttributeValues = expressionAttributeValues
+			input.ExpressionAttributeNames = expressionAttributeNames
 		}
 	}
 
@@ -174,6 +180,7 @@ func (ds *customerDynamoDataSource) FindAll(ctx context.Context, filters map[str
 	if input.FilterExpression != nil {
 		countInput.FilterExpression = input.FilterExpression
 		countInput.ExpressionAttributeValues = input.ExpressionAttributeValues
+		countInput.ExpressionAttributeNames = input.ExpressionAttributeNames
 	}
 
 	countResult, err := ds.db.Client.Scan(ctx, countInput)
