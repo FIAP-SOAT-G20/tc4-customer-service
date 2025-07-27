@@ -24,13 +24,15 @@ jobs:
         image: amazon/dynamodb-local:2.5.2
         ports:
           - 8000:8000
+        env:
+          JAVA_OPTS: "-Djava.library.path=./DynamoDBLocal_lib"
         options: >-
-          -jar DynamoDBLocal.jar -sharedDb -inMemory
           --health-cmd "curl -f http://localhost:8000/shell || exit 1"
           --health-interval 30s
           --health-timeout 10s
           --health-retries 10
           --health-start-period 30s
+          -jar DynamoDBLocal.jar -sharedDb -inMemory
 
     steps:
       - name: 📦 Checkout code
