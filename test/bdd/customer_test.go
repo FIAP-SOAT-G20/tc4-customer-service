@@ -20,6 +20,11 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
+	// Skip BDD tests in coverage mode or when explicitly requested
+	if os.Getenv("COVERAGE_MODE") == "true" || os.Getenv("SKIP_INTEGRATION_TESTS") == "true" {
+		os.Exit(0)
+	}
+
 	flag.Parse()
 	opts.Paths = flag.Args()
 
