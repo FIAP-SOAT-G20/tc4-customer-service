@@ -190,11 +190,42 @@ func (ds *customerDynamoDataSource) FindAll(ctx context.Context, filters map[str
 	return customers, int64(countResult.Count), nil
 }
 
+func (ds *customerDynamoDataSource) getNextID(ctx context.Context) (int, error) {
+	// Scan table to find the highest ID
+	input := &dynamodb.ScanInput{
+		TableName:            aws.String(ds.db.TableName),
+		ProjectionExpression: aws.String("id"),
+	}
+
+	result, err := ds.db.Client.Scan(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+
+	maxID := 0
+	for _, item := range result.Items {
+		var customerModel CustomerDynamoModel
+		err = attributevalue.UnmarshalMap(item, &customerModel)
+		if err != nil {
+			continue
+		}
+		if customerModel.ID > maxID {
+			maxID = customerModel.ID
+		}
+	}
+
+	return maxID + 1, nil
+}
+
 func (ds *customerDynamoDataSource) Create(ctx context.Context, customer *entity.Customer) error {
 	startTime := time.Now()
 
 	if customer.ID == 0 {
-		customer.ID = int(time.Now().UnixNano() / 1000000)
+		nextID, err := ds.getNextID(ctx)
+		if err != nil {
+			return err
+		}
+		customer.ID = nextID
 	}
 
 	customerModel := CustomerDynamoModel{
