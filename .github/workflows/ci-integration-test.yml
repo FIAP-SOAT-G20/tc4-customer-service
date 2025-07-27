@@ -22,6 +22,7 @@ jobs:
         ports:
           - 8000:8000
         options: >-
+          -jar DynamoDBLocal.jar -sharedDb -inMemory
           --health-cmd "curl -f http://localhost:8000/ || exit 1"
           --health-interval 10s
           --health-timeout 5s
