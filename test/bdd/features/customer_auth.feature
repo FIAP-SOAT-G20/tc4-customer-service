@@ -5,7 +5,6 @@ Feature: Customer Authentication
 
   Background:
     Given the customer service is running
-    And the database is clean
 
   Scenario: Successful customer authentication
     Given a customer exists with CPF "12345678901"

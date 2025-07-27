@@ -17,16 +17,12 @@ jobs:
       github.event_name == 'pull_request'
     
     services:
-      mongodb:
-        image: mongo:8.0
-        env:
-          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
-          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
-          MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
+      dynamodb-local:
+        image: amazon/dynamodb-local:latest
         ports:
-          - 27017:27017
+          - 8000:8000
         options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"
+          --health-cmd "curl -f http://localhost:8000/ || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -39,18 +35,11 @@ jobs:
         with:
           go-version: '1.24'
 
-      - name: Install MongoDB Shell
+      - name: Wait for DynamoDB to be ready
         run: |
-          wget -qO- https://www.mongodb.org/static/pgp/server-8.0.asc | sudo apt-key add -
-          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
-          sudo apt-get update
-          sudo apt-get install -y mongodb-mongosh
-
-      - name: Wait for MongoDB to be ready
-        run: |
-          echo "Waiting for MongoDB to be ready..."
-          timeout 60s bash -c 'until mongosh --quiet --eval "db.runCommand({ ping: 1 })" mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin; do sleep 2; done'
-          echo "MongoDB is ready!"
+          echo "Waiting for DynamoDB to be ready..."
+          timeout 60s bash -c 'until curl -f http://localhost:8000/ > /dev/null 2>&1; do sleep 2; done'
+          echo "DynamoDB is ready!"
 
       - name: 🛠️ Create .env
         run: cp .env.example .env
@@ -58,5 +47,7 @@ jobs:
       - name: ✅ Run integration tests
         env:
           ENVIRONMENT: test
-          MONGODB_URI: mongodb://${{ secrets.MONGO_INITDB_ROOT_USERNAME }}:${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}@localhost:27017/${{ secrets.MONGO_INITDB_DATABASE }}?authSource=admin
+          DYNAMODB_TABLE_NAME: tc4-customer-service-test-customers
+          DYNAMODB_REGION: us-east-1
+          TEST_DYNAMODB_ENDPOINT: http://localhost:8000
         run: make integration-test

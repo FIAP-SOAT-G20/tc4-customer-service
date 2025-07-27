@@ -5,7 +5,6 @@ Feature: Customer Management
 
   Background:
     Given the customer service is running
-    And the database is clean
 
   Scenario: Create a new customer
     When I send a request to create a customer with the following details:
