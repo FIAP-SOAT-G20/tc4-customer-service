@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/google/uuid"
 )
 
 type customerDynamoDataSource struct {
@@ -21,7 +20,7 @@ type customerDynamoDataSource struct {
 }
 
 type CustomerDynamoModel struct {
-	ID    string `dynamodbav:"id"`
+	ID    int    `dynamodbav:"id"`
 	CPF   string `dynamodbav:"cpf"`
 	Name  string `dynamodbav:"name"`
 	Email string `dynamodbav:"email"`
@@ -33,13 +32,13 @@ func NewCustomerDynamoDataSource(db *database.DynamoDatabase) port.CustomerDataS
 	}
 }
 
-func (ds *customerDynamoDataSource) FindByID(ctx context.Context, id string) (*entity.Customer, error) {
+func (ds *customerDynamoDataSource) FindByID(ctx context.Context, id int) (*entity.Customer, error) {
 	startTime := time.Now()
 
 	input := &dynamodb.GetItemInput{
 		TableName: aws.String(ds.db.TableName),
 		Key: map[string]types.AttributeValue{
-			"id": &types.AttributeValueMemberS{Value: id},
+			"id": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", id)},
 		},
 	}
 
@@ -194,9 +193,8 @@ func (ds *customerDynamoDataSource) FindAll(ctx context.Context, filters map[str
 func (ds *customerDynamoDataSource) Create(ctx context.Context, customer *entity.Customer) error {
 	startTime := time.Now()
 
-	// Generate UUID if not provided
-	if customer.ID == "" {
-		customer.ID = uuid.New().String()
+	if customer.ID == 0 {
+		customer.ID = int(time.Now().UnixNano() / 1000000)
 	}
 
 	customerModel := CustomerDynamoModel{
@@ -231,7 +229,7 @@ func (ds *customerDynamoDataSource) Update(ctx context.Context, customer *entity
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String(ds.db.TableName),
 		Key: map[string]types.AttributeValue{
-			"id": &types.AttributeValueMemberS{Value: customer.ID},
+			"id": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", customer.ID)},
 		},
 		UpdateExpression: aws.String("SET #name = :name, email = :email, cpf = :cpf"),
 		ExpressionAttributeNames: map[string]string{
@@ -253,13 +251,13 @@ func (ds *customerDynamoDataSource) Update(ctx context.Context, customer *entity
 	return err
 }
 
-func (ds *customerDynamoDataSource) Delete(ctx context.Context, id string) error {
+func (ds *customerDynamoDataSource) Delete(ctx context.Context, id int) error {
 	startTime := time.Now()
 
 	input := &dynamodb.DeleteItemInput{
 		TableName: aws.String(ds.db.TableName),
 		Key: map[string]types.AttributeValue{
-			"id": &types.AttributeValueMemberS{Value: id},
+			"id": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", id)},
 		},
 		ConditionExpression: aws.String("attribute_exists(id)"), // Ensure item exists
 	}

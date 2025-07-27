@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -225,12 +226,6 @@ func iSendAnAuthenticationRequestWithCPF(cpf string) error {
 	return sendLambdaRequest("POST", "/auth", customerRequest, map[string]string{})
 }
 
-// iSendARequestToCreateACustomerWithTheFollowingDetails parses a data table and sends a request to create a customer.
-// The table should contain rows with the following cells:
-// - name: The customer's name
-// - email: The customer's email
-// - cpf: The customer's CPF
-// It returns an error if the request fails.
 func iSendARequestToCreateACustomerWithTheFollowingDetails(table *godog.Table) error {
 	customerRequest := request.CustomerRequest{}
 
@@ -401,7 +396,11 @@ func handleTestGetRequest(ctx context.Context, req events.APIGatewayProxyRequest
 	}
 
 	// Get by ID
-	input := dto.GetCustomerInput{ID: customerID}
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid customer ID"}`}, nil
+	}
+	input := dto.GetCustomerInput{ID: id}
 	resp, err := testCtx.customerController.Get(ctx, testCtx.jsonPresenter, input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 404, Body: `{"message": "Customer not found"}`}, nil
@@ -441,8 +440,12 @@ func handleTestPutRequest(ctx context.Context, req events.APIGatewayProxyRequest
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid request body"}`}, nil
 	}
 
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid customer ID"}`}, nil
+	}
 	input := customerRequest.ToUpdateCustomerInput()
-	input.ID = customerID
+	input.ID = id
 
 	resp, err := testCtx.customerController.Update(ctx, testCtx.jsonPresenter, input)
 	if err != nil {
@@ -458,8 +461,12 @@ func handleTestDeleteRequest(ctx context.Context, req events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Customer ID is required for deletion"}`}, nil
 	}
 
-	input := dto.DeleteCustomerInput{ID: customerID}
-	_, err := testCtx.customerController.Delete(ctx, testCtx.jsonPresenter, input)
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid customer ID"}`}, nil
+	}
+	input := dto.DeleteCustomerInput{ID: id}
+	_, err = testCtx.customerController.Delete(ctx, testCtx.jsonPresenter, input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 404, Body: `{"message": "Customer not found"}`}, nil
 	}
@@ -650,7 +657,7 @@ func createTestTableIfNotExists(db *database.DynamoDatabase) {
 			AttributeDefinitions: []types.AttributeDefinition{
 				{
 					AttributeName: aws.String("id"),
-					AttributeType: types.ScalarAttributeTypeS,
+					AttributeType: types.ScalarAttributeTypeN,
 				},
 				{
 					AttributeName: aws.String("cpf"),

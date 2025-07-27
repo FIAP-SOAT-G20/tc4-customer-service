@@ -1,6 +1,10 @@
 package request
 
-import "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
+import (
+	"strconv"
+
+	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
+)
 
 type CustomerRequest struct {
 	ID    string `json:"id,omitempty"`
@@ -10,8 +14,9 @@ type CustomerRequest struct {
 }
 
 func (c CustomerRequest) ToGetCustomerInput() dto.GetCustomerInput {
+	id, _ := strconv.Atoi(c.ID)
 	return dto.GetCustomerInput{
-		ID: c.ID,
+		ID: id,
 	}
 }
 
@@ -24,8 +29,9 @@ func (c CustomerRequest) ToCreateCustomerInput() dto.CreateCustomerInput {
 }
 
 func (c CustomerRequest) ToUpdateCustomerInput() dto.UpdateCustomerInput {
+	id, _ := strconv.Atoi(c.ID)
 	return dto.UpdateCustomerInput{
-		ID:    c.ID,
+		ID:    id,
 		Name:  c.Name,
 		Email: c.Email,
 	}

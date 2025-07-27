@@ -73,13 +73,13 @@ trigger-lambda: ## ⚡  Trigger lambda with the input file stored in variable $L
 	@echo
 
 mock: ## Generate mocks
-	@echo  "🟢 Generating mocks..."
+	@echo "🟢 Generating mocks..."
 	@go install go.uber.org/mock/mockgen@latest
 	@mkdir -p internal/core/port/mocks
-	@rm -rf internal/core/port/mocks/*
-	@for file in internal/core/port/*.go; do \
-		mockgen -source=$$file -destination=internal/core/port/mocks/`basename $$file _port.go`_mock.go -package=mocks; \
-	done
+	@rm -f internal/core/port/mocks/*.go
+	@mockgen -source=internal/core/port/customer_port.go -destination=internal/core/port/mocks/customer_mock.go -package=mocks
+	@mockgen -source=internal/core/port/authentication_port.go -destination=internal/core/port/mocks/authentication_mock.go -package=mocks
+	@mockgen -source=internal/core/port/presenter_port.go -destination=internal/core/port/mocks/presenter_mock.go -package=mocks
 
 
 .PHONY: test

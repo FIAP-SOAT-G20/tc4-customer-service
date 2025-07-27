@@ -26,19 +26,19 @@ type CustomerUseCase interface {
 }
 
 type CustomerGateway interface {
-	FindByID(ctx context.Context, id string) (*entity.Customer, error)
+	FindByID(ctx context.Context, id int) (*entity.Customer, error)
 	FindByCPF(ctx context.Context, cpf string) (*entity.Customer, error)
 	FindAll(ctx context.Context, name string, page, limit int) ([]*entity.Customer, int64, error)
 	Create(ctx context.Context, customer *entity.Customer) error
 	Update(ctx context.Context, customer *entity.Customer) error
-	Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id int) error
 }
 
 type CustomerDataSource interface {
-	FindByID(ctx context.Context, id string) (*entity.Customer, error)
+	FindByID(ctx context.Context, id int) (*entity.Customer, error)
 	FindByCPF(ctx context.Context, cpf string) (*entity.Customer, error)
 	FindAll(ctx context.Context, filters map[string]interface{}, page, limit int) ([]*entity.Customer, int64, error)
 	Create(ctx context.Context, product *entity.Customer) error
 	Update(ctx context.Context, product *entity.Customer) error
-	Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id int) error
 }

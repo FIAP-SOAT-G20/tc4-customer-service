@@ -149,7 +149,12 @@ func handleGetRequest(ctx context.Context, req events.APIGatewayProxyRequest) (e
 	}
 
 	// Get by ID
-	input := dto.GetCustomerInput{ID: customerID}
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		l.ErrorContext(ctx, "Invalid customer ID", "id", customerID, "error", err)
+		return response.NewAPIGatewayProxyResponseError(err), nil
+	}
+	input := dto.GetCustomerInput{ID: id}
 	resp, err := customerController.Get(ctx, jsonPresenter, input)
 	if err != nil {
 		l.ErrorContext(ctx, "Failed to get customer", "id", customerID, "error", err)
@@ -211,8 +216,14 @@ func handlePutRequest(ctx context.Context, req events.APIGatewayProxyRequest) (e
 		return response.NewAPIGatewayProxyResponseError(&domain.InvalidInputError{Message: err.Error()}), nil
 	}
 
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		l.ErrorContext(ctx, "Invalid customer ID", "id", customerID, "error", err)
+		return response.NewAPIGatewayProxyResponseError(err), nil
+	}
+
 	input := customerRequest.ToUpdateCustomerInput()
-	input.ID = customerID
+	input.ID = id
 
 	resp, err := customerController.Update(ctx, jsonPresenter, input)
 	if err != nil {
@@ -232,7 +243,13 @@ func handleDeleteRequest(ctx context.Context, req events.APIGatewayProxyRequest)
 		}), nil
 	}
 
-	input := dto.DeleteCustomerInput{ID: customerID}
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		l.ErrorContext(ctx, "Invalid customer ID", "id", customerID, "error", err)
+		return response.NewAPIGatewayProxyResponseError(err), nil
+	}
+
+	input := dto.DeleteCustomerInput{ID: id}
 	resp, err := customerController.Delete(ctx, jsonPresenter, input)
 	if err != nil {
 		l.ErrorContext(ctx, "Failed to delete customer", "id", customerID, "error", err)

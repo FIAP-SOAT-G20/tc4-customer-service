@@ -15,7 +15,7 @@ func NewCustomerGateway(dataSource port.CustomerDataSource) port.CustomerGateway
 	return &customerGateway{dataSource}
 }
 
-func (g *customerGateway) FindByID(ctx context.Context, id string) (*entity.Customer, error) {
+func (g *customerGateway) FindByID(ctx context.Context, id int) (*entity.Customer, error) {
 	return g.dataSource.FindByID(ctx, id)
 }
 
@@ -40,6 +40,6 @@ func (g *customerGateway) Update(ctx context.Context, customer *entity.Customer)
 	return g.dataSource.Update(ctx, customer)
 }
 
-func (g *customerGateway) Delete(ctx context.Context, id string) error {
+func (g *customerGateway) Delete(ctx context.Context, id int) error {
 	return g.dataSource.Delete(ctx, id)
 }

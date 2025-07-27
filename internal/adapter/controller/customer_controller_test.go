@@ -29,8 +29,8 @@ func TestCustomerController_List(t *testing.T) {
 	}
 
 	mockCustomers := []*entity.Customer{
-		{ID: "1", Name: "Customer 1", Email: "customer1@test.com", CPF: "123.456.789-01"},
-		{ID: "2", Name: "Customer 2", Email: "customer2@test.com", CPF: "123.456.789-02"},
+		{ID: 1, Name: "Customer 1", Email: "customer1@test.com", CPF: "123.456.789-01"},
+		{ID: 2, Name: "Customer 2", Email: "customer2@test.com", CPF: "123.456.789-02"},
 	}
 
 	tests := []struct {
@@ -124,7 +124,7 @@ func TestCustomerController_Create(t *testing.T) {
 	}
 
 	mockCustomer := &entity.Customer{
-		ID:    "1",
+		ID:    1,
 		Name:  "New Customer",
 		Email: "new@test.com",
 		CPF:   "123.456.789-00",
@@ -208,10 +208,10 @@ func TestCustomerController_Get(t *testing.T) {
 	customerController := controller.NewCustomerController(mockUseCase)
 
 	ctx := context.Background()
-	input := dto.GetCustomerInput{ID: "123"}
+	input := dto.GetCustomerInput{ID: 123}
 
 	mockCustomer := &entity.Customer{
-		ID:    "123",
+		ID:    123,
 		Name:  "Test Customer",
 		Email: "test@test.com",
 		CPF:   "123.456.789-01",
@@ -298,7 +298,7 @@ func TestCustomerController_GetByCPF(t *testing.T) {
 	input := dto.GetCustomerByCPFInput{CPF: "123.456.789-01"}
 
 	mockCustomer := &entity.Customer{
-		ID:    "123",
+		ID:    123,
 		Name:  "Test Customer",
 		Email: "test@test.com",
 		CPF:   "123.456.789-01",
@@ -383,13 +383,13 @@ func TestCustomerController_Update(t *testing.T) {
 
 	ctx := context.Background()
 	input := dto.UpdateCustomerInput{
-		ID:    "123",
+		ID:    123,
 		Name:  "Updated Customer",
 		Email: "updated@test.com",
 	}
 
 	mockCustomer := &entity.Customer{
-		ID:    "123",
+		ID:    123,
 		Name:  "Updated Customer",
 		Email: "updated@test.com",
 		CPF:   "123.456.789-01",
@@ -473,10 +473,10 @@ func TestCustomerController_Delete(t *testing.T) {
 	customerController := controller.NewCustomerController(mockUseCase)
 
 	ctx := context.Background()
-	input := dto.DeleteCustomerInput{ID: "123"}
+	input := dto.DeleteCustomerInput{ID: 123}
 
 	mockCustomer := &entity.Customer{
-		ID:    "123",
+		ID:    123,
 		Name:  "Deleted Customer",
 		Email: "deleted@test.com",
 		CPF:   "123.456.789-01",
