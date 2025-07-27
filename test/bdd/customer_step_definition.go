@@ -128,8 +128,8 @@ func theCustomerServiceIsRunning() error {
 
 	testCtx.dynamoDb = dynamoDb
 
-	// Create test table if it doesn't exist
-	createTestTableIfNotExists(dynamoDb)
+	// Create test table if it doesn't exist (delete and recreate to ensure correct schema)
+	deleteAndRecreateTestTable(dynamoDb)
 
 	// Setup dependencies
 	jwtService := service.NewJWTService(cfg)
@@ -174,7 +174,15 @@ func aCustomerExistsWithID(id string) error {
 	}
 
 	if realID, exists := customerData["id"]; exists {
-		testCtx.lastCreatedCustomerID = realID.(string)
+		// Handle both float64 (JSON number) and int types
+		switch id := realID.(type) {
+		case float64:
+			testCtx.lastCreatedCustomerID = fmt.Sprintf("%.0f", id)
+		case int:
+			testCtx.lastCreatedCustomerID = strconv.Itoa(id)
+		default:
+			return fmt.Errorf("unexpected ID type: %T", realID)
+		}
 	} else {
 		return fmt.Errorf("could not get customer ID from response")
 	}
@@ -569,9 +577,22 @@ func theResponseShouldContainTheCustomerID() error {
 		return fmt.Errorf("response does not contain customer ID")
 	}
 
-	idStr, ok := id.(string)
-	if !ok || idStr == "" {
-		return fmt.Errorf("customer ID is not a valid string")
+	// Accept both numeric IDs (int/float64) and string representations
+	switch idValue := id.(type) {
+	case float64:
+		if idValue <= 0 {
+			return fmt.Errorf("customer ID must be positive, got: %v", idValue)
+		}
+	case int:
+		if idValue <= 0 {
+			return fmt.Errorf("customer ID must be positive, got: %v", idValue)
+		}
+	case string:
+		if idValue == "" {
+			return fmt.Errorf("customer ID cannot be empty")
+		}
+	default:
+		return fmt.Errorf("customer ID has unexpected type: %T, value: %v", id, id)
 	}
 
 	return nil
@@ -633,6 +654,32 @@ func theResponseShouldContainTheUpdatedCustomerDetails() error {
 	}
 
 	return nil
+}
+
+// deleteAndRecreateTestTable ensures we have a fresh table with the correct schema
+func deleteAndRecreateTestTable(db *database.DynamoDatabase) {
+	ctx := context.Background()
+
+	// Try to delete the table if it exists
+	_, err := db.Client.DeleteTable(ctx, &dynamodb.DeleteTableInput{
+		TableName: aws.String(db.TableName),
+	})
+	if err != nil {
+		// Table might not exist, that's okay
+		fmt.Printf("Note: Could not delete table (might not exist): %v\n", err)
+	} else {
+		// Wait for table to be deleted
+		waiter := dynamodb.NewTableNotExistsWaiter(db.Client)
+		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(db.TableName),
+		}, 60*time.Second)
+		if err != nil {
+			fmt.Printf("Warning: Table deletion wait failed: %v\n", err)
+		}
+	}
+
+	// Create the table with the correct schema
+	createTestTableIfNotExists(db)
 }
 
 // createTestTableIfNotExists creates the DynamoDB table for tests if it doesn't exist
