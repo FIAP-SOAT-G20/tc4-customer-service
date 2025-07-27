@@ -6,12 +6,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain/entity"
 )
 
-func (suite *CustomerDataSourceIntegrationTestSuite) TestCreate() {
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoCreate() {
 	tests := []struct {
 		name     string
 		customer *entity.Customer
@@ -43,8 +42,8 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestCreate() {
 
 	for _, tt := range tests {
 		suite.T().Run(tt.name, func(t *testing.T) {
-			// Clear collection before each test
-			_ = suite.collection.Drop(suite.ctx)
+			// Clear table before each test
+			suite.clearTestTable()
 
 			err := suite.dataSource.Create(suite.ctx, tt.customer)
 
@@ -54,15 +53,19 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestCreate() {
 				assert.NoError(t, err)
 				assert.NotEmpty(t, tt.customer.ID, "Customer ID should be set after creation")
 
-				count, err := suite.collection.CountDocuments(suite.ctx, bson.M{})
+				// Verify customer was created by finding it
+				found, err := suite.dataSource.FindByID(suite.ctx, tt.customer.ID)
 				assert.NoError(t, err)
-				assert.Equal(t, int64(1), count, "Should have exactly one customer in collection")
+				assert.NotNil(t, found)
+				assert.Equal(t, tt.customer.Name, found.Name)
+				assert.Equal(t, tt.customer.Email, found.Email)
+				assert.Equal(t, tt.customer.CPF, found.CPF)
 			}
 		})
 	}
 }
 
-func (suite *CustomerDataSourceIntegrationTestSuite) TestFindByID() {
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoFindByID() {
 	customer := &entity.Customer{
 		Name:      "Jane Doe",
 		Email:     "jane.doe@example.com",
@@ -86,12 +89,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestFindByID() {
 		},
 		{
 			name:      "should return nil for non-existent customer",
-			id:        "507f1f77bcf86cd799439011",
-			wantFound: false,
-		},
-		{
-			name:      "should return error for invalid ObjectID",
-			id:        "invalid-id",
+			id:        "non-existent-id",
 			wantFound: false,
 		},
 	}
@@ -100,10 +98,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestFindByID() {
 		suite.T().Run(tt.name, func(t *testing.T) {
 			result, err := suite.dataSource.FindByID(suite.ctx, tt.id)
 
-			if tt.id == "invalid-id" {
-				assert.Error(t, err)
-				assert.Nil(t, result)
-			} else if tt.wantFound {
+			if tt.wantFound {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
 				assert.Equal(t, customer.Name, result.Name)
@@ -117,7 +112,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestFindByID() {
 	}
 }
 
-func (suite *CustomerDataSourceIntegrationTestSuite) TestFindByCPF() {
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoFindByCPF() {
 	customer := &entity.Customer{
 		Name:      "Bob Smith",
 		Email:     "bob.smith@example.com",
@@ -164,7 +159,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestFindByCPF() {
 	}
 }
 
-func (suite *CustomerDataSourceIntegrationTestSuite) TestFindAll() {
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoFindAll() {
 	customers := []*entity.Customer{
 		{
 			Name:      "Alice Johnson",
@@ -215,28 +210,15 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestFindAll() {
 			},
 		},
 		{
-			name:      "should filter customers by name pattern",
-			filters:   map[string]interface{}{"name": bson.M{"$regex": "Alice", "$options": "i"}},
+			name:      "should filter customers by name",
+			filters:   map[string]interface{}{"name": "Alice Johnson"},
 			page:      1,
 			limit:     10,
-			wantCount: 2,
-			wantTotal: 2,
-			checkResult: func(t *testing.T, result []*entity.Customer) {
-				assert.Len(t, result, 2)
-				for _, customer := range result {
-					assert.Contains(t, customer.Name, "Alice")
-				}
-			},
-		},
-		{
-			name:      "should paginate results",
-			filters:   map[string]interface{}{},
-			page:      2,
-			limit:     2,
 			wantCount: 1,
-			wantTotal: 3,
+			wantTotal: 1,
 			checkResult: func(t *testing.T, result []*entity.Customer) {
 				assert.Len(t, result, 1)
+				assert.Equal(t, "Alice Johnson", result[0].Name)
 			},
 		},
 		{
@@ -267,7 +249,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestFindAll() {
 	}
 }
 
-func (suite *CustomerDataSourceIntegrationTestSuite) TestUpdate() {
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoUpdate() {
 	customer := &entity.Customer{
 		Name:      "Original Name",
 		Email:     "original@example.com",
@@ -300,9 +282,9 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestUpdate() {
 			},
 		},
 		{
-			name: "should fail to update with invalid ID",
+			name: "should fail to update with non-existent ID",
 			updateData: func(c *entity.Customer) {
-				c.ID = "invalid-id"
+				c.ID = "non-existent-id"
 				c.Name = "Should not update"
 			},
 			wantErr: true,
@@ -332,7 +314,7 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestUpdate() {
 	}
 }
 
-func (suite *CustomerDataSourceIntegrationTestSuite) TestDelete() {
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoDelete() {
 	customer := &entity.Customer{
 		Name:      "To Delete",
 		Email:     "delete@example.com",
@@ -355,13 +337,8 @@ func (suite *CustomerDataSourceIntegrationTestSuite) TestDelete() {
 			wantErr: false,
 		},
 		{
-			name:    "should not error when deleting non-existent customer",
-			id:      "507f1f77bcf86cd799439011",
-			wantErr: false,
-		},
-		{
-			name:    "should error with invalid ObjectID",
-			id:      "invalid-id",
+			name:    "should fail to delete non-existent customer",
+			id:      "non-existent-id",
 			wantErr: true,
 		},
 	}
