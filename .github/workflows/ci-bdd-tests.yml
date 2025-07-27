@@ -21,15 +21,15 @@ jobs:
 
     services:
       dynamodb-local:
-        image: amazon/dynamodb-local:latest
+        image: amazon/dynamodb-local:2.5.2
         ports:
           - 8000:8000
         options: >-
-          -jar DynamoDBLocal.jar -sharedDb -inMemory
-          --health-cmd "curl -f http://localhost:8000/ || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "curl -f http://localhost:8000/shell || exit 1"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 30s
 
     steps:
       - name: 📦 Checkout code
