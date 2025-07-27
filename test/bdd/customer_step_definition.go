@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -127,8 +128,8 @@ func theCustomerServiceIsRunning() error {
 
 	testCtx.dynamoDb = dynamoDb
 
-	// Create test table if it doesn't exist
-	createTestTableIfNotExists(dynamoDb)
+	// Create test table if it doesn't exist (delete and recreate to ensure correct schema)
+	deleteAndRecreateTestTable(dynamoDb)
 
 	// Setup dependencies
 	jwtService := service.NewJWTService(cfg)
@@ -173,7 +174,15 @@ func aCustomerExistsWithID(id string) error {
 	}
 
 	if realID, exists := customerData["id"]; exists {
-		testCtx.lastCreatedCustomerID = realID.(string)
+		// Handle both float64 (JSON number) and int types
+		switch id := realID.(type) {
+		case float64:
+			testCtx.lastCreatedCustomerID = fmt.Sprintf("%.0f", id)
+		case int:
+			testCtx.lastCreatedCustomerID = strconv.Itoa(id)
+		default:
+			return fmt.Errorf("unexpected ID type: %T", realID)
+		}
 	} else {
 		return fmt.Errorf("could not get customer ID from response")
 	}
@@ -225,12 +234,6 @@ func iSendAnAuthenticationRequestWithCPF(cpf string) error {
 	return sendLambdaRequest("POST", "/auth", customerRequest, map[string]string{})
 }
 
-// iSendARequestToCreateACustomerWithTheFollowingDetails parses a data table and sends a request to create a customer.
-// The table should contain rows with the following cells:
-// - name: The customer's name
-// - email: The customer's email
-// - cpf: The customer's CPF
-// It returns an error if the request fails.
 func iSendARequestToCreateACustomerWithTheFollowingDetails(table *godog.Table) error {
 	customerRequest := request.CustomerRequest{}
 
@@ -401,7 +404,11 @@ func handleTestGetRequest(ctx context.Context, req events.APIGatewayProxyRequest
 	}
 
 	// Get by ID
-	input := dto.GetCustomerInput{ID: customerID}
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid customer ID"}`}, nil
+	}
+	input := dto.GetCustomerInput{ID: id}
 	resp, err := testCtx.customerController.Get(ctx, testCtx.jsonPresenter, input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 404, Body: `{"message": "Customer not found"}`}, nil
@@ -441,8 +448,12 @@ func handleTestPutRequest(ctx context.Context, req events.APIGatewayProxyRequest
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid request body"}`}, nil
 	}
 
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid customer ID"}`}, nil
+	}
 	input := customerRequest.ToUpdateCustomerInput()
-	input.ID = customerID
+	input.ID = id
 
 	resp, err := testCtx.customerController.Update(ctx, testCtx.jsonPresenter, input)
 	if err != nil {
@@ -458,8 +469,12 @@ func handleTestDeleteRequest(ctx context.Context, req events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Customer ID is required for deletion"}`}, nil
 	}
 
-	input := dto.DeleteCustomerInput{ID: customerID}
-	_, err := testCtx.customerController.Delete(ctx, testCtx.jsonPresenter, input)
+	id, err := strconv.Atoi(customerID)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: `{"message": "Invalid customer ID"}`}, nil
+	}
+	input := dto.DeleteCustomerInput{ID: id}
+	_, err = testCtx.customerController.Delete(ctx, testCtx.jsonPresenter, input)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 404, Body: `{"message": "Customer not found"}`}, nil
 	}
@@ -562,9 +577,22 @@ func theResponseShouldContainTheCustomerID() error {
 		return fmt.Errorf("response does not contain customer ID")
 	}
 
-	idStr, ok := id.(string)
-	if !ok || idStr == "" {
-		return fmt.Errorf("customer ID is not a valid string")
+	// Accept both numeric IDs (int/float64) and string representations
+	switch idValue := id.(type) {
+	case float64:
+		if idValue <= 0 {
+			return fmt.Errorf("customer ID must be positive, got: %v", idValue)
+		}
+	case int:
+		if idValue <= 0 {
+			return fmt.Errorf("customer ID must be positive, got: %v", idValue)
+		}
+	case string:
+		if idValue == "" {
+			return fmt.Errorf("customer ID cannot be empty")
+		}
+	default:
+		return fmt.Errorf("customer ID has unexpected type: %T, value: %v", id, id)
 	}
 
 	return nil
@@ -628,6 +656,32 @@ func theResponseShouldContainTheUpdatedCustomerDetails() error {
 	return nil
 }
 
+// deleteAndRecreateTestTable ensures we have a fresh table with the correct schema
+func deleteAndRecreateTestTable(db *database.DynamoDatabase) {
+	ctx := context.Background()
+
+	// Try to delete the table if it exists
+	_, err := db.Client.DeleteTable(ctx, &dynamodb.DeleteTableInput{
+		TableName: aws.String(db.TableName),
+	})
+	if err != nil {
+		// Table might not exist, that's okay
+		fmt.Printf("Note: Could not delete table (might not exist): %v\n", err)
+	} else {
+		// Wait for table to be deleted
+		waiter := dynamodb.NewTableNotExistsWaiter(db.Client)
+		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(db.TableName),
+		}, 60*time.Second)
+		if err != nil {
+			fmt.Printf("Warning: Table deletion wait failed: %v\n", err)
+		}
+	}
+
+	// Create the table with the correct schema
+	createTestTableIfNotExists(db)
+}
+
 // createTestTableIfNotExists creates the DynamoDB table for tests if it doesn't exist
 func createTestTableIfNotExists(db *database.DynamoDatabase) {
 	ctx := context.Background()
@@ -650,7 +704,7 @@ func createTestTableIfNotExists(db *database.DynamoDatabase) {
 			AttributeDefinitions: []types.AttributeDefinition{
 				{
 					AttributeName: aws.String("id"),
-					AttributeType: types.ScalarAttributeTypeS,
+					AttributeType: types.ScalarAttributeTypeN,
 				},
 				{
 					AttributeName: aws.String("cpf"),

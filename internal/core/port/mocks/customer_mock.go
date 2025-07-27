@@ -287,7 +287,7 @@ func (mr *MockCustomerGatewayMockRecorder) Create(ctx, customer any) *gomock.Cal
 }
 
 // Delete mocks base method.
-func (m *MockCustomerGateway) Delete(ctx context.Context, id string) error {
+func (m *MockCustomerGateway) Delete(ctx context.Context, id int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
@@ -332,7 +332,7 @@ func (mr *MockCustomerGatewayMockRecorder) FindByCPF(ctx, cpf any) *gomock.Call 
 }
 
 // FindByID mocks base method.
-func (m *MockCustomerGateway) FindByID(ctx context.Context, id string) (*entity.Customer, error) {
+func (m *MockCustomerGateway) FindByID(ctx context.Context, id int) (*entity.Customer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*entity.Customer)
@@ -399,7 +399,7 @@ func (mr *MockCustomerDataSourceMockRecorder) Create(ctx, product any) *gomock.C
 }
 
 // Delete mocks base method.
-func (m *MockCustomerDataSource) Delete(ctx context.Context, id string) error {
+func (m *MockCustomerDataSource) Delete(ctx context.Context, id int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
@@ -444,7 +444,7 @@ func (mr *MockCustomerDataSourceMockRecorder) FindByCPF(ctx, cpf any) *gomock.Ca
 }
 
 // FindByID mocks base method.
-func (m *MockCustomerDataSource) FindByID(ctx context.Context, id string) (*entity.Customer, error) {
+func (m *MockCustomerDataSource) FindByID(ctx context.Context, id int) (*entity.Customer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*entity.Customer)

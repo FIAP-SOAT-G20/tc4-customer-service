@@ -20,7 +20,7 @@ func createMockCustomers() []*entity.Customer {
 	currentTime := time.Now()
 	return []*entity.Customer{
 		{
-			ID:        "123",
+			ID:        123,
 			Name:      "Test Customer 1",
 			Email:     "test.customer.1@email.com",
 			CPF:       "12345678901",
@@ -28,7 +28,7 @@ func createMockCustomers() []*entity.Customer {
 			UpdatedAt: currentTime,
 		},
 		{
-			ID:        "321",
+			ID:        321,
 			Name:      "Test Customer 2",
 			Email:     "test.customer.2@email.com",
 			CPF:       "12345678902",
@@ -213,10 +213,10 @@ func TestCustomerUseCase_Get(t *testing.T) {
 	}{
 		{
 			name:  "should get customer successfully",
-			input: dto.GetCustomerInput{ID: "123"},
+			input: dto.GetCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(mockCustomers[0], nil)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -231,10 +231,10 @@ func TestCustomerUseCase_Get(t *testing.T) {
 		},
 		{
 			name:  "should return not found error when customer doesn't exist",
-			input: dto.GetCustomerInput{ID: "123"},
+			input: dto.GetCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(nil, nil)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -245,10 +245,10 @@ func TestCustomerUseCase_Get(t *testing.T) {
 		},
 		{
 			name:  "should return internal error when gateway fails",
-			input: dto.GetCustomerInput{ID: "123"},
+			input: dto.GetCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(nil, assert.AnError)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -292,13 +292,13 @@ func TestCustomerUseCase_Update(t *testing.T) {
 		{
 			name: "should update customer successfully",
 			input: dto.UpdateCustomerInput{
-				ID:    "123",
+				ID:    123,
 				Name:  "New Name",
 				Email: "new.name@email.com",
 			},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(mockCustomers[0], nil)
 
 				mockGateway.EXPECT().
@@ -320,13 +320,13 @@ func TestCustomerUseCase_Update(t *testing.T) {
 		{
 			name: "should return error when customer not found",
 			input: dto.UpdateCustomerInput{
-				ID:    "123",
+				ID:    123,
 				Name:  "New Name",
 				Email: "new.name@email.com",
 			},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(nil, nil)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -338,13 +338,13 @@ func TestCustomerUseCase_Update(t *testing.T) {
 		{
 			name: "should return error when gateway find fails",
 			input: dto.UpdateCustomerInput{
-				ID:    "123",
+				ID:    123,
 				Name:  "New Name",
 				Email: "new.name@email.com",
 			},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(nil, assert.AnError)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -356,13 +356,13 @@ func TestCustomerUseCase_Update(t *testing.T) {
 		{
 			name: "should return error when gateway update fails",
 			input: dto.UpdateCustomerInput{
-				ID:    "123",
+				ID:    123,
 				Name:  "New Name",
 				Email: "new.name@email.com",
 			},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(mockCustomers[0], nil)
 
 				mockGateway.EXPECT().
@@ -408,28 +408,28 @@ func TestCustomerUseCase_Delete(t *testing.T) {
 	}{
 		{
 			name:  "should delete customer successfully",
-			input: dto.DeleteCustomerInput{ID: "123"},
+			input: dto.DeleteCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
-					Return(&entity.Customer{ID: "123"}, nil)
+					FindByID(ctx, 123).
+					Return(&entity.Customer{ID: 123}, nil)
 
 				mockGateway.EXPECT().
-					Delete(ctx, "123").
+					Delete(ctx, 123).
 					Return(nil)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
 				assert.NoError(t, err)
 				assert.NotNil(t, customer)
-				assert.Equal(t, "123", customer.ID)
+				assert.Equal(t, 123, customer.ID)
 			},
 		},
 		{
 			name:  "should return not found error when customer doesn't exist",
-			input: dto.DeleteCustomerInput{ID: "123"},
+			input: dto.DeleteCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(nil, nil)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -440,10 +440,10 @@ func TestCustomerUseCase_Delete(t *testing.T) {
 		},
 		{
 			name:  "should return error when gateway fails on find",
-			input: dto.DeleteCustomerInput{ID: "123"},
+			input: dto.DeleteCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(nil, assert.AnError)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {
@@ -454,14 +454,14 @@ func TestCustomerUseCase_Delete(t *testing.T) {
 		},
 		{
 			name:  "should return error when gateway fails on delete",
-			input: dto.DeleteCustomerInput{ID: "123"},
+			input: dto.DeleteCustomerInput{ID: 123},
 			setupMocks: func() {
 				mockGateway.EXPECT().
-					FindByID(ctx, "123").
+					FindByID(ctx, 123).
 					Return(&entity.Customer{}, nil)
 
 				mockGateway.EXPECT().
-					Delete(ctx, "123").
+					Delete(ctx, 123).
 					Return(assert.AnError)
 			},
 			checkResult: func(t *testing.T, customer *entity.Customer, err error) {

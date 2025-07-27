@@ -79,7 +79,7 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoFindByID() 
 
 	tests := []struct {
 		name      string
-		id        string
+		id        int
 		wantFound bool
 	}{
 		{
@@ -89,7 +89,7 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoFindByID() 
 		},
 		{
 			name:      "should return nil for non-existent customer",
-			id:        "non-existent-id",
+			id:        999999,
 			wantFound: false,
 		},
 	}
@@ -284,7 +284,7 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoUpdate() {
 		{
 			name: "should fail to update with non-existent ID",
 			updateData: func(c *entity.Customer) {
-				c.ID = "non-existent-id"
+				c.ID = 999999
 				c.Name = "Should not update"
 			},
 			wantErr: true,
@@ -328,7 +328,7 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoDelete() {
 
 	tests := []struct {
 		name    string
-		id      string
+		id      int
 		wantErr bool
 	}{
 		{
@@ -338,7 +338,7 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TestDynamoDelete() {
 		},
 		{
 			name:    "should fail to delete non-existent customer",
-			id:      "non-existent-id",
+			id:      999999,
 			wantErr: true,
 		},
 	}

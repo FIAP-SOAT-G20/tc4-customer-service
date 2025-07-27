@@ -7,13 +7,13 @@ type CreateCustomerInput struct {
 }
 
 type UpdateCustomerInput struct {
-	ID    string
+	ID    int
 	Name  string
 	Email string
 }
 
 type GetCustomerInput struct {
-	ID string
+	ID int
 }
 
 type GetCustomerByCPFInput struct {
@@ -21,7 +21,7 @@ type GetCustomerByCPFInput struct {
 }
 
 type DeleteCustomerInput struct {
-	ID string
+	ID int
 }
 
 type ListCustomersInput struct {

@@ -5,7 +5,7 @@ import (
 )
 
 type Customer struct {
-	ID        string
+	ID        int
 	Name      string
 	Email     string
 	CPF       string

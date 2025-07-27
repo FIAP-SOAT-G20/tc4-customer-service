@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/domain"
 	"github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/dto"
 	mockport "github.com/FIAP-SOAT-G20/tc4-customer-service/internal/core/port/mocks"
 )
@@ -34,7 +33,7 @@ func TestHandleRequest_GetByID_Success(t *testing.T) {
 
 	// Prepare input and expected request/response for GET by ID
 	customerID := "123"
-	reqInput := dto.GetCustomerInput{ID: customerID}
+	reqInput := dto.GetCustomerInput{ID: 123}
 
 	lambdaReq := events.APIGatewayProxyRequest{
 		HTTPMethod: "GET",
@@ -79,7 +78,6 @@ func TestHandleRequest_ControllerError(t *testing.T) {
 	customerController = mockController
 
 	customerID := "wrong"
-	reqInput := dto.GetCustomerInput{ID: customerID}
 
 	lambdaReq := events.APIGatewayProxyRequest{
 		HTTPMethod: "GET",
@@ -88,15 +86,10 @@ func TestHandleRequest_ControllerError(t *testing.T) {
 		},
 	}
 
-	mockController.
-		EXPECT().
-		Get(gomock.Any(), gomock.Any(), reqInput).
-		Return(nil, &domain.NotFoundError{Message: "not found"}).
-		Times(1)
-
+	// Test expects an invalid ID to return 500 error (not 404) since conversion fails
 	resp, _ := handleRequest(context.Background(), lambdaReq)
-	assert.Equal(t, 404, resp.StatusCode)
-	assert.Contains(t, resp.Body, "not found")
+	assert.Equal(t, 500, resp.StatusCode)
+	assert.Contains(t, resp.Body, "invalid syntax")
 }
 
 func TestHandleRequest_CreateCustomer_Success(t *testing.T) {

@@ -1,6 +1,6 @@
 {
   "resource": "/customers/{id}",
-  "path": "/customers/60f1b2b3c4d5e6f7a8b9c0d1",
+  "path": "/customers/123",
   "httpMethod": "DELETE",
   "headers": {
     "Content-Type": "application/json"
@@ -13,7 +13,7 @@
   "queryStringParameters": null,
   "multiValueQueryStringParameters": null,
   "pathParameters": {
-    "id": "60f1b2b3c4d5e6f7a8b9c0d1"
+    "id": "123"
   },
   "stageVariables": {
     "env": "test"

@@ -48,8 +48,8 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) SetupSuite() {
 
 	suite.dataSource = datasource.NewCustomerDynamoDataSource(suite.db)
 
-	// Create test table if it doesn't exist
-	suite.createTestTableIfNotExists()
+	// Create test table if it doesn't exist (delete and recreate to ensure correct schema)
+	suite.deleteAndRecreateTestTable()
 }
 
 func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TearDownSuite() {
@@ -67,6 +67,29 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) SetupTest() {
 func (suite *CustomerDynamoDataSourceIntegrationTestSuite) TearDownTest() {
 	// Clear table after each test
 	suite.clearTestTable()
+}
+
+func (suite *CustomerDynamoDataSourceIntegrationTestSuite) deleteAndRecreateTestTable() {
+	// Try to delete the table if it exists
+	_, err := suite.db.Client.DeleteTable(suite.ctx, &dynamodb.DeleteTableInput{
+		TableName: aws.String(suite.db.TableName),
+	})
+	if err != nil {
+		// Table might not exist, that's okay
+		suite.T().Logf("Note: Could not delete table (might not exist): %v", err)
+	} else {
+		// Wait for table to be deleted
+		waiter := dynamodb.NewTableNotExistsWaiter(suite.db.Client)
+		err = waiter.Wait(suite.ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(suite.db.TableName),
+		}, 60*time.Second)
+		if err != nil {
+			suite.T().Logf("Warning: Table deletion wait failed: %v", err)
+		}
+	}
+
+	// Create the table with the correct schema
+	suite.createTestTableIfNotExists()
 }
 
 func (suite *CustomerDynamoDataSourceIntegrationTestSuite) createTestTableIfNotExists() {
@@ -88,7 +111,7 @@ func (suite *CustomerDynamoDataSourceIntegrationTestSuite) createTestTableIfNotE
 			AttributeDefinitions: []types.AttributeDefinition{
 				{
 					AttributeName: aws.String("id"),
-					AttributeType: types.ScalarAttributeTypeS,
+					AttributeType: types.ScalarAttributeTypeN,
 				},
 				{
 					AttributeName: aws.String("cpf"),
