@@ -3,19 +3,15 @@ package config
 import (
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	// MongoDB settings
-	MongoURI         string
-	MongoDatabase    string
-	MongoTimeout     time.Duration
-	MongoMaxPoolSize uint64
-	MongoMinPoolSize uint64
+	// DynamoDB settings
+	DynamoTableName string
+	DynamoRegion    string
 
 	// Environment
 	Environment string
@@ -32,10 +28,6 @@ func LoadConfig() *Config {
 		log.Printf("Warning: .env file not found or error loading it: %v", err)
 	}
 
-	mongoTimeout, _ := time.ParseDuration(getEnv("MONGO_TIMEOUT", "10s"))
-	mongoMaxPoolSize, _ := strconv.ParseUint(getEnv("MONGO_MAX_POOL_SIZE", "100"), 10, 64)
-	mongoMinPoolSize, _ := strconv.ParseUint(getEnv("MONGO_MIN_POOL_SIZE", "5"), 10, 64)
-
 	// Environment
 	environment := getEnv("ENVIRONMENT", "development")
 
@@ -47,12 +39,9 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		// MongoDB settings
-		MongoURI:         getEnv("MONGODB_URI", "mongodb://localhost:27017"),
-		MongoDatabase:    getEnv("MONGODB_DATABASE", "customer_service"),
-		MongoTimeout:     mongoTimeout,
-		MongoMaxPoolSize: mongoMaxPoolSize,
-		MongoMinPoolSize: mongoMinPoolSize,
+		// DynamoDB settings
+		DynamoTableName: getEnv("DYNAMODB_TABLE_NAME", "tc4-customer-service-dev-customers"),
+		DynamoRegion:    getEnv("DYNAMODB_REGION", "us-east-1"),
 
 		// Environment
 		Environment: environment,
